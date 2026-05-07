@@ -1,0 +1,19 @@
+# Ignore files with actual secrets
+*-secret-actual.yaml
+*.secret
+pull-secret.txt
+id_rsa*
+
+# Ignore generated kubeconfigs
+kubeconfig*
+*.kubeconfig
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

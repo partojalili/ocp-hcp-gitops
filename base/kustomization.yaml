@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: clusters
+
+resources:
+  - namespace.yaml
+  - pull-secret.yaml
+  - ssh-key.yaml
+  - hostedcluster.yaml
+  - nodepool.yaml
+
+commonLabels:
+  app.kubernetes.io/name: ocp420-hcp
+  app.kubernetes.io/managed-by: gitops

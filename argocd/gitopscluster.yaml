@@ -1,0 +1,26 @@
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: ocp420-hcp-gitops
+  namespace: clusters
+spec:
+  argoServer:
+    cluster: local-cluster
+    argoNamespace: openshift-gitops
+
+  placementRef:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    name: hcp-clusters-placement
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: hcp-clusters-placement
+  namespace: clusters
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            cluster-type: hosted-control-plane
