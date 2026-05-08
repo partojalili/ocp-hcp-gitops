@@ -5,8 +5,8 @@ namespace: clusters
 
 resources:
   - namespace.yaml
-  - pull-secret.yaml
-  - ssh-key.yaml
+  - pull-secret-sealed.yaml
+  - ssh-key-sealed.yaml
   - hostedcluster.yaml
   - nodepool.yaml
 

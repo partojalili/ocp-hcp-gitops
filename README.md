@@ -41,16 +41,32 @@ ocp-hcp-gitops/
 
 ## Deployment Steps
 
-### 1. Configure Pull Secret
+### 1. Install Sealed Secrets Controller
 
-Edit `base/pull-secret.yaml` and add your Red Hat pull secret:
+```bash
+# Install on your ACM hub cluster
+oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
+
+# Install kubeseal CLI
+brew install kubeseal  # macOS
+```
+
+### 2. Seal Your Secrets
 
 ```bash
 # Download your pull secret from https://console.redhat.com/openshift/install/pull-secret
-cat ~/pull-secret.txt | base64 -w0
+# Save as pull-secret.txt
+
+# Run the sealing script
+./scripts/seal-secrets.sh
+
+# Commit sealed secrets (safe!)
+git add base/pull-secret-sealed.yaml base/ssh-key-sealed.yaml
+git commit -m "Add sealed secrets"
+git push
 ```
 
-Paste the base64 output into `base/pull-secret.yaml`
+See [SEALED-SECRETS-GUIDE.md](SEALED-SECRETS-GUIDE.md) for detailed instructions.
 
 ### 2. Apply via ArgoCD
 

@@ -80,29 +80,47 @@ These scripts will check:
 - GitOps operator
 - Storage classes
 
-### Step 2: Configure Secrets
+### Step 2: Install Sealed Secrets Controller
 
-#### Pull Secret
+The Sealed Secrets controller must be installed on your ACM hub cluster:
 
-1. Download your pull secret from https://console.redhat.com/openshift/install/pull-secret
+```bash
+# Install the controller
+oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
 
-2. Base64 encode it:
-   ```bash
-   cat ~/Downloads/pull-secret.txt | base64 -w0
-   ```
+# Wait for it to be ready
+oc wait --for=condition=Available deployment/sealed-secrets-controller -n kube-system --timeout=300s
 
-3. Edit `base/pull-secret.yaml` and replace `REPLACE_WITH_YOUR_BASE64_ENCODED_PULL_SECRET`
+# Install kubeseal CLI
+brew install kubeseal  # macOS
+```
 
-#### SSH Key (Optional but Recommended)
+### Step 3: Seal Your Secrets
 
-1. Generate SSH key:
-   ```bash
-   ssh-keygen -t rsa -b 4096 -f ~/.ssh/ocp420-hcp -N ""
-   ```
+Using Sealed Secrets ensures your credentials are never committed to Git in plaintext:
 
-2. Edit `base/ssh-key.yaml` and paste the contents of `~/.ssh/ocp420-hcp.pub`
+```bash
+# 1. Download your pull secret
+# From: https://console.redhat.com/openshift/install/pull-secret
+# Save as: pull-secret.txt
 
-### Step 3: Customize Configuration
+# 2. Generate SSH key (optional)
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/ocp420-hcp -N ""
+
+# 3. Run the sealing script
+./scripts/seal-secrets.sh
+
+# 4. Commit sealed secrets (SAFE to commit!)
+git add base/pull-secret-sealed.yaml base/ssh-key-sealed.yaml
+git commit -m "Add sealed secrets for deployment"
+git push
+```
+
+**Important**: Sealed secrets are encrypted and safe to commit to Git. Only the Sealed Secrets controller in your cluster can decrypt them.
+
+See [SEALED-SECRETS-GUIDE.md](SEALED-SECRETS-GUIDE.md) for detailed documentation.
+
+### Step 4: Customize Configuration
 
 Edit `overlays/production/hostedcluster-patch.yaml`:
 
@@ -115,7 +133,7 @@ spec:
     image: quay.io/openshift-release-dev/ocp-release:4.20.0-x86_64
 ```
 
-### Step 4: Enable HyperShift in MCE
+### Step 5: Enable HyperShift in MCE
 
 If not already enabled:
 
@@ -129,7 +147,7 @@ Wait for the HyperShift operator to be ready:
 oc wait --for=condition=Available deployment/operator -n hypershift --timeout=300s
 ```
 
-### Step 5: Deploy via GitOps
+### Step 6: Deploy via GitOps
 
 #### Option A: Using ArgoCD Application
 
@@ -169,7 +187,7 @@ For managing multiple hosted clusters:
 oc apply -f argocd/applicationset.yaml
 ```
 
-### Step 6: Monitor Deployment
+### Step 7: Monitor Deployment
 
 Use the monitoring script:
 
@@ -196,7 +214,7 @@ oc get vm -n clusters-ocp420-hcp
 oc describe hostedcluster ocp420-hcp -n clusters
 ```
 
-### Step 7: Access the Hosted Cluster
+### Step 8: Access the Hosted Cluster
 
 Extract the kubeconfig:
 

@@ -2,7 +2,14 @@
 *-secret-actual.yaml
 *.secret
 pull-secret.txt
+pull-secret.json
+pull-secret-temp.yaml
+ssh-key-temp.yaml
 id_rsa*
+
+# Keep original unsealed secret templates for reference
+base/pull-secret.yaml
+base/ssh-key.yaml
 
 # Ignore generated kubeconfigs
 kubeconfig*
