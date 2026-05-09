@@ -79,8 +79,7 @@ oc create secret docker-registry ocp420-hcp-pull-secret \
   --dry-run=client -o yaml > pull-secret-temp.yaml
 
 echo "Sealing secret..."
-kubeseal --format=yaml --cert=<(oc get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml | oc neat) \
-  < pull-secret-temp.yaml > base/pull-secret-sealed.yaml
+kubeseal --format=yaml < pull-secret-temp.yaml > base/pull-secret-sealed.yaml
 
 rm pull-secret-temp.yaml
 
@@ -103,8 +102,7 @@ if [ -f "$HOME/.ssh/ocp420-hcp.pub" ]; then
       --dry-run=client -o yaml > ssh-key-temp.yaml
 
     echo "Sealing secret..."
-    kubeseal --format=yaml --cert=<(oc get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml | oc neat) \
-      < ssh-key-temp.yaml > base/ssh-key-sealed.yaml
+    kubeseal --format=yaml < ssh-key-temp.yaml > base/ssh-key-sealed.yaml
 
     rm ssh-key-temp.yaml
 
