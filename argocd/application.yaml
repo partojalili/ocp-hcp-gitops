@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
     targetRevision: main
     path: overlays/production
 

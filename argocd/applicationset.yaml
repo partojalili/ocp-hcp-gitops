@@ -7,7 +7,7 @@ spec:
   generators:
     # Git generator to deploy multiple clusters from directories
     - git:
-        repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
         revision: main
         directories:
           - path: overlays/*
@@ -22,7 +22,7 @@ spec:
       project: default
 
       source:
-        repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
         targetRevision: main
         path: '{{path}}'
 

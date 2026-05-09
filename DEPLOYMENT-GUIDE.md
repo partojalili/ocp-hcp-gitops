@@ -156,7 +156,7 @@ oc wait --for=condition=Available deployment/operator -n hypershift --timeout=30
 2. Edit `argocd/application.yaml` and update the Git URL:
    ```yaml
    source:
-     repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+     repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
    ```
 
 3. Apply the ArgoCD Application:

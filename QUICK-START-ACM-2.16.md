@@ -49,7 +49,7 @@ spec:
 ```bash
 # Update Git URL in argocd/application.yaml
 git init && git add . && git commit -m "OCP 4.20 HCP"
-git remote add origin https://github.com/YOUR-ORG/YOUR-REPO.git
+git remote add origin https://github.com/partojalili/ocp-hcp-gitops.git
 git push -u origin main
 
 oc apply -f argocd/application.yaml
