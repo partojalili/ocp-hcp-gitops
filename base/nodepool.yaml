@@ -27,7 +27,7 @@ spec:
       rootVolume:
         persistent:
           size: 120Gi
-          storageClass: ocs-storagecluster-ceph-rbd
+          storageClass: ocs-external-storagecluster-ceph-rbd
         type: Persistent
 
       # Additional volumes (optional)

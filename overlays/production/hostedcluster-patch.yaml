@@ -6,7 +6,7 @@ metadata:
 spec:
   # Production-specific overrides
   dns:
-    baseDomain: prod.example.com
+    baseDomain: apps.cluster-nwjrk.dynamic2.redhatworkshops.io
 
   # Production release image (update for specific patch version)
   release:
