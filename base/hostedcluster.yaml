@@ -27,8 +27,6 @@ spec:
   # DNS configuration
   dns:
     baseDomain: example.com
-    privateZoneID: ""
-    publicZoneID: ""
 
   # Platform: OpenShift Virtualization (KubeVirt)
   platform:
