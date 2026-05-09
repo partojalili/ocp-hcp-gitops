@@ -12,8 +12,8 @@ if ! command -v kubeseal &> /dev/null; then
     echo
     echo "Install kubeseal:"
     echo "  macOS:   brew install kubeseal"
-    echo "  Linux:   wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/kubeseal-0.24.0-linux-amd64.tar.gz"
-    echo "           tar -xvzf kubeseal-0.24.0-linux-amd64.tar.gz kubeseal"
+    echo "  Linux:   wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/kubeseal-0.36.6-linux-amd64.tar.gz"
+    echo "           tar -xvzf kubeseal-0.36.6-linux-amd64.tar.gz kubeseal"
     echo "           sudo install -m 755 kubeseal /usr/local/bin/kubeseal"
     echo
     exit 1
@@ -34,12 +34,12 @@ if ! oc get deployment sealed-secrets-controller -n kube-system &> /dev/null; th
     echo "WARNING: Sealed Secrets controller not found in kube-system namespace"
     echo
     echo "Install Sealed Secrets controller:"
-    echo "  oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml"
+    echo "  oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml"
     echo
     read -p "Do you want to install it now? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
+        oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
         echo "Waiting for controller to be ready..."
         oc wait --for=condition=Available deployment/sealed-secrets-controller -n kube-system --timeout=300s
     else

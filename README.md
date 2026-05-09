@@ -45,7 +45,7 @@ ocp-hcp-gitops/
 
 ```bash
 # Install on your ACM hub cluster
-oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
+oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
 
 # Install kubeseal CLI
 brew install kubeseal  # macOS

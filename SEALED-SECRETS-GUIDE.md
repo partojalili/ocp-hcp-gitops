@@ -50,7 +50,7 @@ The controller must be installed on your **ACM hub cluster**:
 
 ```bash
 # Install the controller
-oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
+oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
 
 # Wait for it to be ready
 oc wait --for=condition=Available deployment/sealed-secrets-controller -n kube-system --timeout=300s
@@ -70,8 +70,8 @@ brew install kubeseal
 
 **Linux**:
 ```bash
-wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/kubeseal-0.24.0-linux-amd64.tar.gz
-tar -xvzf kubeseal-0.24.0-linux-amd64.tar.gz kubeseal
+wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/kubeseal-0.36.6-linux-amd64.tar.gz
+tar -xvzf kubeseal-0.36.6-linux-amd64.tar.gz kubeseal
 sudo install -m 755 kubeseal /usr/local/bin/kubeseal
 ```
 

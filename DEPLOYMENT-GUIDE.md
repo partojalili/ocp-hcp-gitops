@@ -86,7 +86,7 @@ The Sealed Secrets controller must be installed on your ACM hub cluster:
 
 ```bash
 # Install the controller
-oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
+oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
 
 # Wait for it to be ready
 oc wait --for=condition=Available deployment/sealed-secrets-controller -n kube-system --timeout=300s
