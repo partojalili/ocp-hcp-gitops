@@ -10,7 +10,7 @@ spec:
 
   # Production release image (update for specific patch version)
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.20.0-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
 
   # High availability for production
   controllerAvailabilityPolicy: HighlyAvailable

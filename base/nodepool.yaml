@@ -10,9 +10,9 @@ spec:
   # Number of worker nodes
   replicas: 3
 
-  # OCP 4.20 release image (must match HostedCluster)
+  # OCP 4.19 release image (must match HostedCluster)
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.20.0-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
 
   # Platform: KubeVirt
   platform:

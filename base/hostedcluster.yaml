@@ -4,9 +4,9 @@ metadata:
   name: ocp420-hcp
   namespace: clusters
 spec:
-  # OCP 4.20 release image
+  # OCP 4.19 release image (latest supported)
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.20.0-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
 
   # Pull secret reference
   pullSecret:
