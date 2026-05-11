@@ -54,6 +54,9 @@ spec:
     - service: APIServer
       servicePublishingStrategy:
         type: NodePort
+        nodePort:
+          address: ""
+          port: 30443
     - service: OAuthServer
       servicePublishingStrategy:
         type: Route
