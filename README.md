@@ -1,12 +1,12 @@
-# OpenShift 4.20 Hosted Control Plane - GitOps Deployment
+# OpenShift Hosted Control Plane - GitOps Deployment
 
-This repository contains GitOps manifests for deploying an OpenShift 4.20 Hosted Control Plane cluster using ACM (Advanced Cluster Management) and OpenShift Virtualization (KubeVirt).
+This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted Control Plane cluster using ACM (Advanced Cluster Management) and OpenShift Virtualization (KubeVirt).
 
 ## Architecture
 
 - **Control Plane**: Runs as pods on the ACM hub cluster
 - **Worker Nodes**: Run as VMs using OpenShift Virtualization (KubeVirt)
-- **OCP Version**: 4.20
+- **OCP Version**: 4.19
 - **Management**: ACM + OpenShift GitOps (ArgoCD)
 
 ## Prerequisites
@@ -36,18 +36,16 @@ ocp-hcp-gitops/
 │   └── production/
 │       ├── hostedcluster-patch.yaml
 │       └── kustomization.yaml
-├── day2-config/                    # Day 2 Operations
-│   ├── README.md
-│   └── network-policies/           # Network security policies
-│       ├── deny-all-default.yaml
-│       ├── allow-dns.yaml
-│       ├── allow-ingress-controller.yaml
-│       ├── allow-monitoring.yaml
-│       └── kustomization.yaml
+├── policies/                       # ACM Policies
+│   └── network/                    # Network security policies
+│       ├── deny-all-policy.yaml
+│       ├── placement.yaml
+│       ├── placementbinding.yaml
+│       └── managedclustersetbinding.yaml
 ├── argocd/                         # GitOps configuration
 │   ├── application.yaml
-│   ├── applicationset.yaml
-│   └── gitopscluster.yaml
+│   ├── acm-network-policy-app.yaml
+│   └── argocd-acm-permissions.yaml
 └── scripts/                        # Helper scripts
     ├── seal-secrets.sh
     ├── validate-prereqs.sh
@@ -101,7 +99,7 @@ oc get hostedcluster -n clusters -w
 oc get nodepool -n clusters -w
 
 # Get kubeconfig for hosted cluster
-oc extract secret/ocp420-hcp-admin-kubeconfig -n clusters --to=-
+oc extract secret/ocp-hcp-admin-kubeconfig -n clusters --to=-
 ```
 
 ## Manual Deployment (Alternative)
@@ -117,7 +115,7 @@ oc apply -k overlays/production/
 Edit `nodepool.yaml` and change `spec.replicas`:
 
 ```bash
-oc patch nodepool ocp420-hcp-workers -n clusters --type=merge -p '{"spec":{"replicas":5}}'
+oc patch nodepool ocp-hcp-workers -n clusters --type=merge -p '{"spec":{"replicas":5}}'
 ```
 
 ## Upgrading the Cluster
@@ -126,45 +124,67 @@ Update the `release-image` in both HostedCluster and NodePool resources.
 
 ## Day 2 Operations
 
-### Network Policies
+### Network Policies via ACM
 
-Baseline network security policies are managed via GitOps in `day2-config/network-policies/`.
+Network security policies are enforced across managed clusters using ACM Policies, deployed via ArgoCD.
 
-**View deployed policies**:
+**View ACM Policy**:
 ```bash
-oc get networkpolicy -n baseline-policies
+oc get policy -n open-cluster-management-policies
+```
+
+**Check which clusters are targeted**:
+```bash
+oc get placementdecision -n open-cluster-management-policies -o yaml
+```
+
+**View NetworkPolicy on managed cluster (ocp-hcp)**:
+```bash
+# Login to the managed cluster first
+oc get networkpolicy deny-all-default -n webserver-prod
 ```
 
 **ArgoCD Application**:
 ```bash
-oc get application network-policies -n openshift-gitops
+oc get application acm-deny-all-network-policy -n openshift-gitops
 ```
 
-### GitOps Self-Healing Demo
+### Drift Prevention and Self-Healing Demo
 
-Demonstrate ArgoCD's self-healing capability by deleting a network policy:
+Demonstrate ArgoCD's drift prevention capability with ACM policy enforcement:
 
-**1. View current policies**:
+**1. Create the target namespace on the managed cluster**:
 ```bash
-oc get networkpolicy -n baseline-policies
+# Login to ocp-hcp managed cluster
+oc new-project webserver-prod
 ```
 
-**2. Delete a policy**:
+**2. Verify the NetworkPolicy was automatically created by ACM**:
 ```bash
-oc delete networkpolicy allow-dns -n baseline-policies
+oc get networkpolicy deny-all-default -n webserver-prod
 ```
 
-**3. Watch ArgoCD automatically recreate it** (within ~30 seconds):
+**3. Delete the NetworkPolicy to simulate drift**:
 ```bash
-watch oc get networkpolicy -n baseline-policies
+oc delete networkpolicy deny-all-default -n webserver-prod
 ```
 
-**4. Check ArgoCD sync status**:
+**4. Watch ACM automatically recreate it** (within ~10 seconds):
 ```bash
-oc get application network-policies -n openshift-gitops
+watch oc get networkpolicy deny-all-default -n webserver-prod
 ```
 
-ArgoCD detects the drift from Git and automatically recreates the deleted resource because `selfHeal: true` is enabled!
+**5. Check the ACM Policy compliance status**:
+```bash
+# From hub cluster
+oc get policy policy-deny-all-network -n open-cluster-management-policies -o jsonpath='{.status.compliant}'
+```
+
+**What's happening**:
+- ArgoCD syncs the ACM Policy definition from Git to the hub cluster (with `selfHeal: true`)
+- ACM enforces the NetworkPolicy on managed clusters based on Placement rules
+- If someone deletes the NetworkPolicy on the managed cluster, ACM detects the drift and recreates it automatically
+- This provides **two layers of drift prevention**: ArgoCD protects the policy definition, ACM enforces the policy on clusters
 
 ## Resources
 
