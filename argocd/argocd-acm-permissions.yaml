@@ -21,6 +21,7 @@ rules:
     resources:
       - placements
       - placementdecisions
+      - managedclustersetbindings
     verbs:
       - create
       - delete
