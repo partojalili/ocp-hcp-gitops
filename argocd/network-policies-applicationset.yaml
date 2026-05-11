@@ -6,13 +6,14 @@ metadata:
 spec:
   generators:
     - clusterDecisionResource:
+        configMapRef: acm-placement
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: network-policies-placement
         requeueAfterSeconds: 180
   template:
     metadata:
-      name: 'network-policies-{{name}}'
+      name: 'network-policies-{{clusterName}}'
       labels:
         environment: production
     spec:
@@ -22,7 +23,7 @@ spec:
         targetRevision: main
         path: day2-config/network-policies
       destination:
-        server: '{{server}}'
+        name: '{{clusterName}}'
         namespace: baseline-policies
       syncPolicy:
         automated:
