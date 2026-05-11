@@ -20,13 +20,8 @@ spec:
           remediationAction: enforce
           severity: high
           namespaceSelector:
-            exclude:
-              - kube-*
-              - openshift-*
-              - open-cluster-management-agent
-              - open-cluster-management-agent-addon
             include:
-              - '*'
+              - webserver-prod
           object-templates:
             - complianceType: musthave
               objectDefinition:
@@ -34,7 +29,7 @@ spec:
                 kind: NetworkPolicy
                 metadata:
                   name: deny-all-default
-                  namespace: '{{hub fromConfigMap "" "namespace" "name" hub}}'
+                  namespace: webserver-prod
                 spec:
                   podSelector: {}
                   policyTypes:
