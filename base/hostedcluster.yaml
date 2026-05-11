@@ -53,7 +53,7 @@ spec:
   services:
     - service: APIServer
       servicePublishingStrategy:
-        type: Route
+        type: NodePort
     - service: OAuthServer
       servicePublishingStrategy:
         type: Route
