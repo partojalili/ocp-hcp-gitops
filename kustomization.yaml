@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
   - overlays/production
-  - day2-config/network-policies
