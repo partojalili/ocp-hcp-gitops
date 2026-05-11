@@ -1,11 +1,11 @@
 apiVersion: hypershift.openshift.io/v1beta1
 kind: NodePool
 metadata:
-  name: ocp420-hcp-workers
+  name: ocp-hcp-workers
   namespace: clusters
 spec:
   # Reference to the HostedCluster
-  clusterName: ocp420-hcp
+  clusterName: ocp-hcp
 
   # Number of worker nodes
   replicas: 3

@@ -1,7 +1,7 @@
 apiVersion: hypershift.openshift.io/v1beta1
 kind: HostedCluster
 metadata:
-  name: ocp420-hcp
+  name: ocp-hcp
   namespace: clusters
 spec:
   # OCP 4.19 release image (latest supported)
@@ -10,11 +10,11 @@ spec:
 
   # Pull secret reference
   pullSecret:
-    name: ocp420-hcp-pull-secret
+    name: ocp-hcp-pull-secret
 
   # SSH key for node access (optional)
   sshKey:
-    name: ocp420-hcp-ssh-key
+    name: ocp-hcp-ssh-key
 
   # Networking configuration
   networking:

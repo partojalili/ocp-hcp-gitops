@@ -1,7 +1,7 @@
 apiVersion: hypershift.openshift.io/v1beta1
 kind: HostedCluster
 metadata:
-  name: ocp420-hcp
+  name: ocp-hcp
   namespace: clusters
 spec:
   # Production-specific overrides
