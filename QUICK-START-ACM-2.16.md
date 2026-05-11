@@ -14,6 +14,7 @@ cd ocp-hcp-gitops
 ```
 
 **Expected Output** (for ACM 2.16):
+
 ```
 ✅ ACM 2.16 detected - fully compatible!
 ✅ MCE 2.11 detected - fully compatible!
@@ -37,6 +38,7 @@ cat ~/.ssh/ocp420-hcp.pub
 ### 3. Customize DNS
 
 Edit `overlays/production/hostedcluster-patch.yaml`:
+
 ```yaml
 spec:
   dns:
@@ -46,16 +48,18 @@ spec:
 ### 4. Deploy
 
 **Option A - GitOps (Recommended)**:
+
 ```bash
 # Update Git URL in argocd/application.yaml
 git init && git add . && git commit -m "OCP 4.20 HCP"
-git remote add origin https://github.com/partojalili/ocp-hcp-gitops.git
+git remote add origin https://github.com/YOUR-ORG/YOUR-REPO.git
 git push -u origin main
 
 oc apply -f argocd/application.yaml
 ```
 
 **Option B - Direct**:
+
 ```bash
 oc apply -k overlays/production/
 ```
@@ -76,21 +80,25 @@ oc get nodes
 
 ## What's Using ACM 2.16 Features?
 
-| Feature | ACM 2.16 Enhancement | Used In This Repo |
-|---------|---------------------|-------------------|
-| HyperShift API v1beta1 | Stable API (v1alpha1 deprecated) | ✅ All manifests |
-| Hosted Cluster Upgrade UI | Visual upgrade channels | ✅ Enabled by default |
-| GitOps Custom CA | Secure TLS connections | 🔧 Optional (argocd/) |
-| VM RBAC (MultiClusterRoleAssignment) | Centralized VM permissions | 📖 See ACM-2.16-COMPATIBILITY.md |
-| RightSizingRecommendation | Workload optimization | 📖 See ACM-2.16-COMPATIBILITY.md |
+
+| Feature                              | ACM 2.16 Enhancement             | Used In This Repo                |
+| ------------------------------------ | -------------------------------- | -------------------------------- |
+| HyperShift API v1beta1               | Stable API (v1alpha1 deprecated) | ✅ All manifests                  |
+| Hosted Cluster Upgrade UI            | Visual upgrade channels          | ✅ Enabled by default             |
+| GitOps Custom CA                     | Secure TLS connections           | 🔧 Optional (argocd/)            |
+| VM RBAC (MultiClusterRoleAssignment) | Centralized VM permissions       | 📖 See ACM-2.16-COMPATIBILITY.md |
+| RightSizingRecommendation            | Workload optimization            | 📖 See ACM-2.16-COMPATIBILITY.md |
+
 
 ## Version Compatibility Matrix (ACM 2.16)
 
-| Hub Cluster OCP | Hosted Cluster OCP | Status |
-|-----------------|-------------------|--------|
-| 4.16 | 4.17, 4.18, 4.19, 4.20 | ✅ |
-| 4.17 | 4.17, 4.18, 4.19, 4.20 | ✅ |
-| 4.18 | 4.16, 4.17, 4.18, 4.19, 4.20 | ✅ |
+
+| Hub Cluster OCP | Hosted Cluster OCP           | Status |
+| --------------- | ---------------------------- | ------ |
+| 4.16            | 4.17, 4.18, 4.19, 4.20       | ✅      |
+| 4.17            | 4.17, 4.18, 4.19, 4.20       | ✅      |
+| 4.18            | 4.16, 4.17, 4.18, 4.19, 4.20 | ✅      |
+
 
 **Rule**: NodePools must be within 3 minor versions of HostedCluster and cannot be newer.
 
@@ -166,13 +174,15 @@ oc wait --for=condition=Available deployment/operator -n hypershift --timeout=5m
 
 ## What's Different from ACM 2.15 or Earlier?
 
-| Change | ACM 2.15 | ACM 2.16 |
-|--------|----------|----------|
+
+| Change      | ACM 2.15            | ACM 2.16                           |
+| ----------- | ------------------- | ---------------------------------- |
 | API Version | v1beta1 or v1alpha1 | v1beta1 only (v1alpha1 deprecated) |
-| MCE Version | 2.10 | 2.11 |
-| Upgrade UI | Basic | Enhanced with channels |
-| VM RBAC | Manual | MultiClusterRoleAssignment |
-| GitOps TLS | Default certs | Custom CA support |
+| MCE Version | 2.10                | 2.11                               |
+| Upgrade UI  | Basic               | Enhanced with channels             |
+| VM RBAC     | Manual              | MultiClusterRoleAssignment         |
+| GitOps TLS  | Default certs       | Custom CA support                  |
+
 
 ## Resources
 
