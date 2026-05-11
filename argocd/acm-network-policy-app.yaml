@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acm-deny-all-network-policy
+  namespace: openshift-gitops
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+    targetRevision: main
+    path: policies/network
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: open-cluster-management-policies
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  ignoreDifferences:
+    - group: policy.open-cluster-management.io
+      kind: Policy
+      jsonPointers:
+        - /status
