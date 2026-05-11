@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: network-policies
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: network-policies-placement
+        requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: 'network-policies-{{name}}'
+      labels:
+        environment: production
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        targetRevision: main
+        path: day2-config/network-policies
+      destination:
+        server: '{{server}}'
+        namespace: baseline-policies
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+      ignoreDifferences:
+        - group: networking.k8s.io
+          kind: NetworkPolicy
+          jsonPointers:
+            - /status
