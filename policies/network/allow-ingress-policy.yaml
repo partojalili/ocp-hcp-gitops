@@ -1,0 +1,46 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-allow-ingress
+  namespace: open-cluster-management-policies
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: SC System and Communications Protection
+    policy.open-cluster-management.io/controls: SC-7 Boundary Protection
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-allow-ingress
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            include:
+              - webserver-prod
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: networking.k8s.io/v1
+                kind: NetworkPolicy
+                metadata:
+                  name: allow-from-ingress-controller
+                  namespace: webserver-prod
+                spec:
+                  podSelector:
+                    matchLabels:
+                      app: webserver
+                  policyTypes:
+                    - Ingress
+                  ingress:
+                    - from:
+                        - namespaceSelector:
+                            matchLabels:
+                              policy-group.network.openshift.io/ingress: ""
+                      ports:
+                        - protocol: TCP
+                          port: 8080

@@ -1,0 +1,13 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-allow-ingress
+  namespace: open-cluster-management-policies
+placementRef:
+  name: placement-allow-ingress
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+  - name: policy-allow-ingress
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
