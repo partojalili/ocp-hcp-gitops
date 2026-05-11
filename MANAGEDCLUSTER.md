@@ -23,6 +23,8 @@ oc apply -f managedcluster-labels.yaml
 - **environment**: `production` - Production environment designation
 - **cloud**: `Other` - Cloud provider (KubeVirt/OpenShift Virtualization)
 - **vendor**: `OpenShift` - Platform vendor
+- **app.kubernetes.io/name**: `ocp-hcp` - Application/cluster name
+- **app.kubernetes.io/managed-by**: `gitops` - Managed by GitOps/ArgoCD
 
 ## ManagedClusterSet Binding
 

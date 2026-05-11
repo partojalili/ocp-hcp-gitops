@@ -7,3 +7,5 @@ metadata:
     environment: production
     cloud: Other
     vendor: OpenShift
+    app.kubernetes.io/name: ocp-hcp
+    app.kubernetes.io/managed-by: gitops
