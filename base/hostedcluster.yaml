@@ -55,7 +55,8 @@ spec:
       servicePublishingStrategy:
         type: NodePort
         nodePort:
-          port: 30443  # NodePort for API server access
+          address: 10.10.10.10
+          port: 30443
     - service: OAuthServer
       servicePublishingStrategy:
         type: Route
