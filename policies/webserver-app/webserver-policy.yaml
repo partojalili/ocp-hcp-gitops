@@ -62,7 +62,7 @@ spec:
             include:
               - webserver-prod
           object-templates:
-            - complianceType: mustonlyhave
+            - complianceType: musthave
               objectDefinition:
                 apiVersion: apps/v1
                 kind: Deployment
