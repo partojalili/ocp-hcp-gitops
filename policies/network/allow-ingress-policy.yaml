@@ -43,4 +43,5 @@ spec:
                               policy-group.network.openshift.io/ingress: ""
                       ports:
                         - protocol: TCP
-                          port: 8082
+                          port: 8080
+
