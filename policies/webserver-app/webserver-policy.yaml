@@ -82,7 +82,7 @@ spec:
                         app: webserver
                       annotations:
                         configmap.reloader.stakater.com/reload: "application-content"
-                        config-version: "2"
+                        config-version: "3"
                     spec:
                       containers:
                         - name: httpd
@@ -91,9 +91,8 @@ spec:
                             - containerPort: 8080
                               name: webserver
                           volumeMounts:
-                            - mountPath: /var/www/html/application.html
+                            - mountPath: /var/www/html
                               name: application-content
-                              subPath: application.html
                           resources:
                             requests:
                               memory: "128Mi"
@@ -104,9 +103,6 @@ spec:
                       volumes:
                         - configMap:
                             defaultMode: 420
-                            items:
-                            - key: application.html
-                              path: application.html
                             name: application-content
                           name: application-content
     # Service
