@@ -8,4 +8,4 @@ spec:
     - requiredClusterSelector:
         labelSelector:
           matchLabels:
-            name: ocp-hcp1
+            name: ocp-hcp
