@@ -40,7 +40,7 @@ spec:
             include:
               - webserver-prod
           object-templates:
-            - complianceType: musthave
+            - complianceType: mustonlyhave
               objectDefinition:
                 apiVersion: v1
                 kind: ConfigMap
@@ -62,7 +62,7 @@ spec:
             include:
               - webserver-prod
           object-templates:
-            - complianceType: musthave
+            - complianceType: mustonlyhave
               objectDefinition:
                 apiVersion: apps/v1
                 kind: Deployment
