@@ -25,33 +25,61 @@ This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted
 
 ```
 ocp-hcp-gitops/
-├── base/                           # Base Kustomize resources
+├── base/                              # Base Kustomize resources
 │   ├── namespace.yaml
-│   ├── pull-secret-sealed.yaml     # Encrypted pull secret
-│   ├── ssh-key-sealed.yaml         # Encrypted SSH key
+│   ├── pull-secret-sealed.yaml        # Encrypted pull secret
+│   ├── ssh-key-sealed.yaml            # Encrypted SSH key
 │   ├── hostedcluster.yaml
 │   ├── nodepool.yaml
 │   └── kustomization.yaml
-├── overlays/                       # Environment-specific overlays
+│
+├── overlays/                          # Environment-specific overlays
 │   └── production/
 │       ├── hostedcluster-patch.yaml
 │       └── kustomization.yaml
-├── policies/                       # ACM Policies
-│   └── network/                    # Network security policies
-│       ├── deny-all-policy.yaml
+│
+├── policies/                          # ACM Policies (managed by ArgoCD)
+│   ├── network/                       # Network security policies
+│   │   ├── deny-all-policy.yaml
+│   │   ├── allow-ingress-policy.yaml
+│   │   ├── allow-ingress-placement.yaml
+│   │   ├── allow-ingress-placementbinding.yaml
+│   │   ├── placement.yaml
+│   │   ├── placementbinding.yaml
+│   │   └── managedclustersetbinding.yaml
+│   └── webserver-app/                 # Webserver application policy
+│       ├── webserver-policy.yaml
 │       ├── placement.yaml
-│       ├── placementbinding.yaml
-│       └── managedclustersetbinding.yaml
-├── argocd/                         # GitOps configuration
-│   ├── application.yaml
-│   ├── acm-network-policy-app.yaml
-│   └── argocd-acm-permissions.yaml
-└── scripts/                        # Helper scripts
-    ├── seal-secrets.sh
-    ├── validate-prereqs.sh
-    ├── verify-acm-version.sh
-    ├── get-kubeconfig.sh
-    └── monitor-deployment.sh
+│       └── placementbinding.yaml
+│
+├── argocd/                            # ArgoCD applications
+│   ├── application.yaml               # Main HCP deployment app
+│   ├── acm-network-policy-app.yaml    # Network policy app
+│   ├── acm-webserver-app.yaml         # Webserver app
+│   └── argocd-acm-permissions.yaml    # RBAC for ArgoCD
+│
+├── scripts/                           # Helper scripts
+│   ├── seal-secrets.sh
+│   ├── validate-prereqs.sh
+│   ├── verify-acm-version.sh
+│   ├── get-kubeconfig.sh
+│   └── monitor-deployment.sh
+│
+├── conn-ocp-hcp.sh                    # Connect to hosted cluster
+├── disconnect-ocp-hcp.sh              # Disconnect from hosted cluster
+├── kustomization.yaml                 # Root kustomization
+├── managedcluster-labels.yaml         # ManagedCluster labels
+│
+└── Documentation/
+    ├── README.md                      # This file
+    ├── ACM-ARGOCD-INTEGRATION.md      # ACM + ArgoCD integration guide
+    ├── ACM-2.16-COMPATIBILITY.md      # ACM 2.16 compatibility notes
+    ├── DEPLOYMENT-GUIDE.md            # Detailed deployment guide
+    ├── HOW-TO-UPDATE-WEBSERVER.md     # Auto-reload webserver guide
+    ├── MANAGEDCLUSTER.md              # ManagedCluster configuration
+    ├── QUICK-REFERENCE.md             # Command quick reference
+    ├── QUICK-START-ACM-2.16.md        # Quick start guide
+    └── SEALED-SECRETS-GUIDE.md        # Sealed secrets guide
 ```
 
 ## Deployment Steps
