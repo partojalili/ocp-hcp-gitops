@@ -82,7 +82,7 @@ spec:
                         app: webserver
                       annotations:
                         configmap.reloader.stakater.com/reload: "application-content"
-                        config-version: "1"
+                        config-version: "2"
                     spec:
                       containers:
                         - name: httpd
