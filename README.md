@@ -9,6 +9,27 @@ This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted
 - **OCP Version**: 4.19
 - **Management**: ACM + OpenShift GitOps (ArgoCD)
 
+## How It Works - GitOps Flow
+
+This repository implements a complete GitOps workflow where changes flow from Git to production automatically:
+
+```
+Developer → Git Push → ArgoCD Sync → ACM Policy → Managed Cluster → Production
+```
+
+**Key Flow:**
+1. **Developer** commits changes to GitHub (e.g., update webserver HTML)
+2. **ArgoCD** detects changes and syncs to hub cluster (~3 min)
+3. **ACM Placement** selects target clusters based on labels
+4. **ACM Policy Controller** propagates policies to managed clusters
+5. **Managed Cluster** applies resources (ConfigMap, Deployment, etc.)
+6. **Kubernetes** performs rolling update with new content
+7. **Compliance** status reported back to hub
+
+**Total Time:** ~4-6 minutes from commit to production!
+
+📖 **See [GITOPS-FLOW.md](GITOPS-FLOW.md) for detailed flow diagrams and component interactions.**
+
 ## Prerequisites
 
 1. **ACM 2.16** (or 2.10+) installed on hub cluster
@@ -75,6 +96,7 @@ ocp-hcp-gitops/
     ├── ACM-ARGOCD-INTEGRATION.md      # ACM + ArgoCD integration guide
     ├── ACM-2.16-COMPATIBILITY.md      # ACM 2.16 compatibility notes
     ├── DEPLOYMENT-GUIDE.md            # Detailed deployment guide
+    ├── GITOPS-FLOW.md                 # Complete GitOps flow diagram ⭐
     ├── HOW-TO-UPDATE-WEBSERVER.md     # Auto-reload webserver guide
     ├── MANAGEDCLUSTER.md              # ManagedCluster configuration
     ├── QUICK-REFERENCE.md             # Command quick reference
