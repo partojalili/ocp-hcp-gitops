@@ -10,11 +10,11 @@ spec:
 
   # Pull secret reference
   pullSecret:
-    name: ocp-hcp-pull-secret
+    name: ocp420-hcp-pull-secret
 
   # SSH key for node access (optional)
   sshKey:
-    name: ocp-hcp-ssh-key
+    name: ocp420-hcp-ssh-key
 
   # Networking configuration
   networking:
