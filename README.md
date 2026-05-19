@@ -247,18 +247,36 @@ brew install kubeseal  # macOS
 
 ### 2. Seal Your Secrets
 
-```bash
-# Download your pull secret from https://console.redhat.com/openshift/install/pull-secret
-# Save as pull-secret.txt
+**IMPORTANT:** The `pull-secret.txt` file must be placed in the **repository root** directory.
 
-# Run the sealing script
+```bash
+# 1. Download your pull secret from Red Hat
+# https://console.redhat.com/openshift/install/pull-secret
+
+# 2. Save it in the REPOSITORY ROOT (NOT in subdirectories)
+# Location: /path/to/ocp-hcp-gitops/pull-secret.txt
+cp ~/Downloads/pull-secret.txt ./pull-secret.txt
+
+# 3. Run the sealing script (from repository root)
 ./scripts/seal-secrets.sh
 
-# Commit sealed secrets (safe!)
+# 4. Commit sealed secrets (safe to commit!)
 git add base/pull-secret-sealed.yaml base/ssh-key-sealed.yaml
 git commit -m "Add sealed secrets"
 git push
 ```
+
+**File Location:**
+```
+ocp-hcp-gitops/
+├── pull-secret.txt           ← Put it HERE (repository root)
+├── scripts/
+│   └── seal-secrets.sh      ← Script looks for ../pull-secret.txt
+└── base/
+    └── pull-secret-sealed.yaml  ← Output goes here
+```
+
+**Note:** The `pull-secret.txt` file is already in `.gitignore` and will not be committed to Git.
 
 See [SEALED-SECRETS-GUIDE.md](SEALED-SECRETS-GUIDE.md) for detailed instructions.
 
