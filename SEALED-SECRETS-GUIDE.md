@@ -2,6 +2,19 @@
 
 This repository uses **Sealed Secrets** to safely store sensitive data in Git without exposing credentials.
 
+## ⚠️ Important: Generic Secret Naming
+
+As of the latest version, this repository uses **generic, version-agnostic secret names**:
+- `hcp-pull-secret` (instead of `ocp420-hcp-pull-secret`)
+- `hcp-ssh-key` (instead of `ocp420-hcp-ssh-key`)
+
+**If you have existing sealed secrets**, you need to **regenerate them** using the updated script:
+```bash
+./scripts/seal-secrets.sh
+```
+
+This ensures your secrets work with the new naming convention.
+
 ## What are Sealed Secrets?
 
 Sealed Secrets is a Kubernetes controller that allows you to encrypt secrets so they can be safely committed to Git. Only the controller running in your cluster can decrypt them.
