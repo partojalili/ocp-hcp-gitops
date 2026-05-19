@@ -2,6 +2,23 @@
 
 This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted Control Plane cluster using ACM (Advanced Cluster Management) and OpenShift Virtualization (KubeVirt).
 
+## ⚠️ IMPORTANT: Update Base Domain
+
+**Before deploying**, you MUST update the base domain to match your environment:
+
+1. Open `overlays/production/hostedcluster-patch.yaml`
+2. Update the `baseDomain` field:
+   ```yaml
+   dns:
+     baseDomain: apps.cluster-XXXXX.dynamic2.redhatworkshops.io
+   ```
+3. Replace `XXXXX` with your actual cluster subdomain
+
+To find your cluster's base domain:
+```bash
+oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'
+```
+
 ## Architecture
 
 - **Control Plane**: Runs as pods on the ACM hub cluster
