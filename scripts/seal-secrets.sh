@@ -73,7 +73,7 @@ fi
 echo "Found pull secret: $PULL_SECRET_FILE"
 echo "Creating temporary secret..."
 
-oc create secret docker-registry ocp420-hcp-pull-secret \
+oc create secret docker-registry hcp-pull-secret \
   --from-file=.dockerconfigjson=$PULL_SECRET_FILE \
   --namespace=clusters \
   --dry-run=client -o yaml > pull-secret-temp.yaml
@@ -92,12 +92,22 @@ echo "2. Sealing SSH Key (optional)"
 echo "=========================================="
 echo
 
-if [ -f "$HOME/.ssh/ocp420-hcp.pub" ]; then
-    echo "Found SSH key: $HOME/.ssh/ocp420-hcp.pub"
+# Look for SSH public key in common locations
+SSH_KEY=""
+if [ -f "$HOME/.ssh/id_rsa.pub" ]; then
+    SSH_KEY="$HOME/.ssh/id_rsa.pub"
+elif [ -f "$HOME/.ssh/id_ed25519.pub" ]; then
+    SSH_KEY="$HOME/.ssh/id_ed25519.pub"
+elif [ -f "$HOME/.ssh/id_ecdsa.pub" ]; then
+    SSH_KEY="$HOME/.ssh/id_ecdsa.pub"
+fi
+
+if [ -n "$SSH_KEY" ]; then
+    echo "Found SSH key: $SSH_KEY"
     echo "Creating temporary secret..."
 
-    oc create secret generic ocp420-hcp-ssh-key \
-      --from-file=id_rsa.pub=$HOME/.ssh/ocp420-hcp.pub \
+    oc create secret generic hcp-ssh-key \
+      --from-file=id_rsa.pub=$SSH_KEY \
       --namespace=clusters \
       --dry-run=client -o yaml > ssh-key-temp.yaml
 
@@ -108,7 +118,8 @@ if [ -f "$HOME/.ssh/ocp420-hcp.pub" ]; then
 
     echo "✓ Created base/ssh-key-sealed.yaml"
 else
-    echo "⚠️  SSH key not found at $HOME/.ssh/ocp420-hcp.pub"
+    echo "⚠️  No SSH public key found in $HOME/.ssh/"
+    echo "   Looked for: id_rsa.pub, id_ed25519.pub, id_ecdsa.pub"
     echo "   Skipping SSH key sealing (you can add it later)"
 fi
 
