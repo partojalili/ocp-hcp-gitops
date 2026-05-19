@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ocp420-hcp-ssh-key
+  name: hcp-ssh-key
   namespace: clusters
 type: Opaque
 stringData:
@@ -9,5 +9,5 @@ stringData:
     REPLACE_WITH_YOUR_SSH_PUBLIC_KEY
 ---
 # Generate SSH key if you don't have one:
-#   ssh-keygen -t rsa -b 4096 -f ~/.ssh/ocp420-hcp -N ""
-# Then paste the contents of ~/.ssh/ocp420-hcp.pub above
+#   ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+# Then paste the contents of ~/.ssh/id_rsa.pub above

@@ -11,5 +11,5 @@ resources:
   - nodepool.yaml
 
 commonLabels:
-  app.kubernetes.io/name: ocp420-hcp
+  app.kubernetes.io/name: ocp-hcp
   app.kubernetes.io/managed-by: gitops
