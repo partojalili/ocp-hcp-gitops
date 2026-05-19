@@ -1,0 +1,4 @@
+pull-secret.txt
+pull-secret.json
+*.log
+.DS_Store

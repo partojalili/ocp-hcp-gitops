@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: CLUSTER_NAME-hosted-cluster
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+    targetRevision: main
+    path: clusters/CLUSTER_NAME
+
+  destination:
+    server: https://kubernetes.default.svc
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  ignoreDifferences:
+    - group: hypershift.openshift.io
+      kind: HostedCluster
+      jsonPointers:
+        - /status
+    - group: hypershift.openshift.io
+      kind: NodePool
+      jsonPointers:
+        - /status
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+      jsonPointers:
+        - /status
