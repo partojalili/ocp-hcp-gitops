@@ -4,17 +4,32 @@ This directory contains a reusable template for provisioning OpenShift Hosted Co
 
 ## Quick Start
 
-Provision a new cluster with a single command:
+**IMPORTANT:** The `provision-cluster.sh` script creates the cluster **configuration files only**. The actual cluster deployment happens in Step 3 below after you seal the secrets.
+
+### Complete Workflow
 
 ```bash
+# Step 1: Create cluster configuration directory
 cd hcp-template
 ./provision-cluster.sh -n my-cluster
+
+# Step 2: Add pull secret and seal it (REQUIRED before deployment)
+cd ../clusters/my-cluster
+cp ~/Downloads/pull-secret.txt ./
+./scripts/seal-secrets.sh
+
+# Step 3: Deploy the cluster (actual provisioning starts here)
+oc apply -f argocd/application.yaml
+
+# Step 4: Monitor deployment
+oc get hostedcluster my-cluster -n clusters -w
 ```
 
-This will:
+The `provision-cluster.sh` script will:
 1. Auto-detect your environment's base domain
-2. Create a new cluster configuration in `../clusters/my-cluster/`
-3. Configure 2 worker nodes with 4 cores and 8GB RAM (default)
+2. Create a new cluster configuration directory in `../clusters/my-cluster/`
+3. Generate manifest files with your cluster name and settings
+4. Configure 2 worker nodes with 4 cores and 8GB RAM (default)
 
 ## Usage
 
@@ -69,11 +84,13 @@ Options:
 ./provision-cluster.sh -n test-hcp -d apps.cluster-xxxxx.dynamic2.redhatworkshops.io
 ```
 
-## Post-Provisioning Steps
+## Step-by-Step Deployment
 
-After running `provision-cluster.sh`, follow these steps:
+After running `provision-cluster.sh` to create the configuration, follow these steps to deploy the actual cluster:
 
-### 1. Seal Secrets
+### Step 1: Seal Secrets (REQUIRED)
+
+**⚠️ IMPORTANT:** The pull secret is required for the cluster to pull the OCP release image. Without it, deployment will fail with authentication errors.
 
 Navigate to your cluster directory and seal the secrets:
 
@@ -83,22 +100,27 @@ cd ../clusters/CLUSTER_NAME
 # Download your pull secret from Red Hat Console
 # https://console.redhat.com/openshift/install/pull-secret
 # Save it as pull-secret.txt in the cluster directory
+cp ~/Downloads/pull-secret.txt ./pull-secret.txt
 
-# Run the seal-secrets script
+# Run the seal-secrets script to encrypt the pull secret
 ./scripts/seal-secrets.sh
 ```
 
-### 2. Commit to Git (Optional for GitOps)
+This creates `base/pull-secret-sealed.yaml` and `base/ssh-key-sealed.yaml` which are safe to commit to Git.
+
+### Step 2: Commit to Git (Optional - for GitOps)
 
 If using ArgoCD for GitOps deployment:
 
 ```bash
 git add .
-git commit -m "Add CLUSTER_NAME configuration"
+git commit -m "Add CLUSTER_NAME cluster configuration"
 git push
 ```
 
-### 3. Deploy the Cluster
+### Step 3: Deploy the Cluster (Actual Provisioning Starts Here)
+
+**⚠️ This is when the actual cluster provisioning begins.**
 
 **Option A: Using ArgoCD (GitOps - Recommended)**
 
@@ -106,7 +128,7 @@ git push
 oc apply -f argocd/application.yaml
 ```
 
-ArgoCD will automatically sync from Git and deploy the cluster.
+ArgoCD will automatically sync from Git and create the HostedCluster and NodePool resources, which triggers the cluster provisioning.
 
 **Option B: Manual Deployment with Kustomize**
 
@@ -114,7 +136,7 @@ ArgoCD will automatically sync from Git and deploy the cluster.
 oc apply -k .
 ```
 
-### 4. Monitor Deployment
+### Step 4: Monitor Cluster Provisioning
 
 Watch the cluster provisioning:
 
@@ -134,7 +156,7 @@ oc extract secret/CLUSTER_NAME-admin-kubeconfig -n clusters --to=-
 
 ## Directory Structure
 
-After provisioning, your cluster directory will contain:
+After running `provision-cluster.sh` (Step 1), your cluster directory will contain:
 
 ```
 clusters/CLUSTER_NAME/
@@ -230,6 +252,14 @@ oc get pods -n clusters-CLUSTER_NAME
 
 # Check events
 oc get events -n clusters-CLUSTER_NAME --sort-by='.lastTimestamp'
+```
+
+**Issue: Pull secret authentication failure**
+```bash
+# Error: "unauthorized: Could not find robot with specified username"
+# Solution: Download a fresh pull secret from Red Hat Console
+# https://console.redhat.com/openshift/install/pull-secret
+# Re-run: ./scripts/seal-secrets.sh
 ```
 
 ## Prerequisites
