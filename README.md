@@ -4,20 +4,52 @@ This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted
 
 ## ⚠️ IMPORTANT: Update Base Domain
 
-**Before deploying**, you MUST update the base domain to match your environment:
+**Before deploying**, you MUST update the base domain to match your environment.
 
-1. Open `overlays/production/hostedcluster-patch.yaml`
-2. Update the `baseDomain` field:
-   ```yaml
-   dns:
-     baseDomain: apps.cluster-XXXXX.dynamic2.redhatworkshops.io
-   ```
-3. Replace `XXXXX` with your actual cluster subdomain
+### File to Update
 
-To find your cluster's base domain:
-```bash
-oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'
+**Only update this file:**
 ```
+overlays/production/hostedcluster-patch.yaml
+```
+
+This is the **production overlay** that contains your real cluster domain.
+
+### Step-by-Step Instructions
+
+1. **Find your cluster's base domain:**
+   ```bash
+   oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'
+   ```
+   Example output: `apps.cluster-q2pfv.dynamic2.redhatworkshops.io`
+
+2. **Edit the overlay file:**
+   ```bash
+   vim overlays/production/hostedcluster-patch.yaml
+   ```
+
+3. **Update line 9 with your domain:**
+   ```yaml
+   spec:
+     dns:
+       baseDomain: apps.cluster-XXXXX.dynamic2.redhatworkshops.io  # ← Update this
+   ```
+
+4. **Commit and push:**
+   ```bash
+   git add overlays/production/hostedcluster-patch.yaml
+   git commit -m "Update baseDomain for my environment"
+   git push
+   ```
+
+### Files Overview
+
+| File | Purpose | Should You Edit? |
+|------|---------|------------------|
+| `overlays/production/hostedcluster-patch.yaml` | Production domain override | ✅ **YES - Update this!** |
+| `base/hostedcluster.yaml` | Base template with placeholder | ❌ NO - Keep as `example.com` |
+
+**Note:** The `baseDomain` field is **immutable** after cluster creation. If you need to change it later, you must delete and recreate the HostedCluster.
 
 ## Architecture
 
