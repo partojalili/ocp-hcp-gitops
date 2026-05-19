@@ -20,8 +20,8 @@ spec:
     kubevirt:
       # VM compute resources
       compute:
-        cores: 8
-        memory: 16Gi
+        cores: 2
+        memory: 8Gi
 
       # Root volume configuration
       rootVolume:
