@@ -3,6 +3,7 @@ kind: ClusterRole
 metadata:
   name: argocd-acm-policy-manager
 rules:
+  # ACM Policies
   - apiGroups:
       - policy.open-cluster-management.io
     resources:
@@ -16,12 +17,59 @@ rules:
       - patch
       - update
       - watch
+
+  # ACM Placements
   - apiGroups:
       - cluster.open-cluster-management.io
     resources:
       - placements
       - placementdecisions
       - managedclustersetbindings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  # HyperShift / Hosted Control Planes
+  - apiGroups:
+      - hypershift.openshift.io
+    resources:
+      - hostedclusters
+      - nodepools
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  # Sealed Secrets
+  - apiGroups:
+      - bitnami.com
+    resources:
+      - sealedsecrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  # Core Resources
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - secrets
+      - configmaps
     verbs:
       - create
       - delete
