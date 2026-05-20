@@ -112,27 +112,28 @@ spec:
 
     - id: publish
       name: Publish to GitHub
-      action: github:repo:push
+      action: publish:github:pull-request
       input:
         repoUrl: github.com?owner=partojalili&repo=ocp-hcp-gitops
-        branchName: main
-        sourcePath: ./
-        targetPath: clusters/${{ parameters.clusterName }}
-        commitMessage: |
-          Add HCP cluster: ${{ parameters.clusterName }}
+        branchName: add-cluster-${{ parameters.clusterName }}
+        targetBranchName: main
+        title: "Add HCP cluster: ${{ parameters.clusterName }}"
+        description: |
+          ## Cluster Configuration
 
-          Cluster configuration:
-          - Workers: ${{ parameters.workerReplicas }}
-          - CPU: ${{ parameters.cpuCores }} cores
-          - Memory: ${{ parameters.memoryGi }}Gi
-          - Domain: ${{ parameters.baseDomain }}
+          - **Cluster Name**: ${{ parameters.clusterName }}
+          - **Workers**: ${{ parameters.workerReplicas }}
+          - **CPU**: ${{ parameters.cpuCores }} cores
+          - **Memory**: ${{ parameters.memoryGi }}Gi
+          - **Domain**: ${{ parameters.baseDomain }}
 
           Provisioned via Red Hat Developer Hub
+        targetPath: clusters/${{ parameters.clusterName }}
 
   output:
     links:
-      - title: View Cluster Config in GitHub
-        url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/clusters/${{ parameters.clusterName }}
+      - title: View Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
       - title: Track Deployment Status
         icon: dashboard
         url: https://console-openshift-console.apps.cluster-q2pfv.dynamic2.redhatworkshops.io/k8s/ns/clusters-${{ parameters.clusterName }}/hypershift.openshift.io~v1beta1~HostedCluster/${{ parameters.clusterName }}
