@@ -7,6 +7,10 @@ pull-secret-temp.yaml
 ssh-key-temp.yaml
 id_rsa*
 
+# Developer Hub - prevent accidentally committing unsealed GitHub token
+/tmp/github-secret.yaml
+developer-hub/*-secret-unsealed.yaml
+
 # Keep original unsealed secret templates for reference
 base/pull-secret.yaml
 base/ssh-key.yaml

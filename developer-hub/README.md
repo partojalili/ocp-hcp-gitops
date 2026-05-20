@@ -252,36 +252,72 @@ Developer Hub includes a Software Template for provisioning OpenShift Hosted Con
 
 ### Prerequisites for Self-Service
 
-1. **GitHub Personal Access Token** (for committing cluster configs):
-   ```bash
-   # Create token at: https://github.com/settings/tokens/new
-   # Required scope: 'repo' (Full control of private repositories)
-   # Expiration: 90 days (recommended)
-   
-   # Update the secret with your token:
-   # Edit developer-hub/github-integration-secret.yaml
-   # Replace REPLACE_WITH_YOUR_GITHUB_TOKEN with your actual token
-   
-   oc apply -f github-integration-secret.yaml
-   ```
+#### Option 1: Automated Setup with Sealed Secrets (Recommended)
 
-2. **Apply GitHub Integration Config**:
-   ```bash
-   oc apply -f github-integration-config.yaml
-   ```
+Use the provided script to securely create and seal your GitHub token:
 
-3. **Apply Catalog Locations Config**:
-   ```bash
-   oc apply -f catalog-locations-config.yaml
-   ```
+```bash
+cd developer-hub
+./seal-github-token.sh
 
-4. **Update Backstage Instance**:
-   ```bash
-   oc apply -f backstage-instance.yaml
-   
-   # Wait for pod to restart (~2 minutes)
-   oc get pods -n rhdh-operator -w
-   ```
+# The script will:
+# 1. Prompt for your GitHub token
+# 2. Create a sealed secret (encrypted)
+# 3. Save to github-integration-sealed-secret.yaml
+# 4. Show next steps
+
+# Then apply the sealed secret and configs:
+oc apply -f github-integration-sealed-secret.yaml
+oc apply -f github-integration-config.yaml
+oc apply -f catalog-locations-config.yaml
+oc apply -f backstage-instance.yaml
+
+# Wait for pod to restart (~2 minutes)
+oc get pods -n rhdh-operator -w
+```
+
+**Why Sealed Secrets?**
+- ✅ Safe to commit encrypted secret to git
+- ✅ Can only be decrypted by your cluster
+- ✅ No risk of token exposure
+- ✅ GitOps-friendly
+
+#### Option 2: Manual Sealed Secret Creation
+
+```bash
+# 1. Create GitHub token at: https://github.com/settings/tokens/new
+#    Required scope: 'repo' (Full control of private repositories)
+
+# 2. Create temporary secret file
+cat > /tmp/github-secret.yaml <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-github-secret
+  namespace: rhdh-operator
+type: Opaque
+stringData:
+  GITHUB_TOKEN: "ghp_YOUR_TOKEN_HERE"
+EOF
+
+# 3. Seal the secret
+kubeseal -f /tmp/github-secret.yaml \
+         -w developer-hub/github-integration-sealed-secret.yaml \
+         --controller-namespace sealed-secrets \
+         --controller-name sealed-secrets-controller
+
+# 4. Clean up
+rm /tmp/github-secret.yaml
+
+# 5. Apply all configs
+oc apply -f developer-hub/github-integration-sealed-secret.yaml
+oc apply -f developer-hub/github-integration-config.yaml
+oc apply -f developer-hub/catalog-locations-config.yaml
+oc apply -f developer-hub/backstage-instance.yaml
+
+# Wait for pod to restart
+oc get pods -n rhdh-operator -w
+```
 
 ### Using the Self-Service Portal
 
