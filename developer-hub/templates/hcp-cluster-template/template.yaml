@@ -110,63 +110,71 @@ spec:
           memoryGi: ${{ parameters.memoryGi }}
           repoUrl: ${{ parameters.repoUrl }}
 
-    - id: publish
-      name: Publish to GitHub
-      action: publish:github
+    - id: log
+      name: Log cluster details
+      action: debug:log
       input:
-        allowedHosts:
-          - github.com
-        description: OpenShift HCP cluster ${{ parameters.clusterName }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        sourcePath: ./
-        targetPath: clusters/${{ parameters.clusterName }}
-        commitMessage: |
-          Add OpenShift HCP cluster: ${{ parameters.clusterName }}
+        message: |
+          Cluster configuration created:
+          - Name: ${{ parameters.clusterName }}
+          - Domain: ${{ parameters.baseDomain }}
+          - Workers: ${{ parameters.workerReplicas }}
+          - CPU: ${{ parameters.cpuCores }} cores
+          - Memory: ${{ parameters.memoryGi }}Gi
+
+  output:
+    text:
+      - title: Cluster Configuration Created
+        content: |
+          Your HCP cluster configuration for **${{ parameters.clusterName }}** has been generated!
+
+          **Configuration Details:**
+          - Cluster Name: ${{ parameters.clusterName }}
+          - Base Domain: ${{ parameters.baseDomain }}
+          - Worker Nodes: ${{ parameters.workerReplicas }}
+          - CPU per Worker: ${{ parameters.cpuCores }} cores
+          - Memory per Worker: ${{ parameters.memoryGi }}Gi
+
+          **IMPORTANT - Manual Step Required:**
+
+          The cluster configuration files have been created but need to be committed to git manually.
+
+          **Copy and run these commands in your terminal:**
+
+          ```bash
+          # 1. Save the generated files (they are in your Backstage workspace)
+          # The files are located at: clusters/${{ parameters.clusterName }}/
+
+          # 2. Navigate to your git repository
+          cd /path/to/ocp-hcp-gitops
+
+          # 3. Copy the generated cluster files
+          # (You'll need to copy from Backstage output - files shown above)
+
+          # 4. Add and commit to git
+          git add clusters/${{ parameters.clusterName }}/
+          git commit -m "Add HCP cluster: ${{ parameters.clusterName }}
 
           Cluster configuration:
           - Workers: ${{ parameters.workerReplicas }}
           - CPU: ${{ parameters.cpuCores }} cores
-          - Memory: ${{ parameters.memoryGi }} Gi
+          - Memory: ${{ parameters.memoryGi }}Gi
           - Domain: ${{ parameters.baseDomain }}
 
-          Provisioned via Red Hat Developer Hub
+          Provisioned via Developer Hub"
 
-    - id: register
-      name: Register in Catalog
-      action: catalog:register
-      input:
-        optional: true
-        catalogInfoUrl: ${{ steps.publish.output.commitUrl }}
+          # 5. Push to GitHub
+          git push origin main
+          ```
 
-  output:
-    links:
-      - title: View Cluster Config in GitHub
-        url: ${{ steps.publish.output.remoteUrl }}
-      - title: Track Deployment Status
-        icon: dashboard
-        url: https://console-openshift-console.apps.cluster-q2pfv.dynamic2.redhatworkshops.io/k8s/ns/clusters-${{ parameters.clusterName }}/hypershift.openshift.io~v1beta1~HostedCluster/${{ parameters.clusterName }}
-      - title: ArgoCD Application
-        icon: sync
-        url: https://openshift-gitops-server-openshift-gitops.apps.cluster-q2pfv.dynamic2.redhatworkshops.io/applications/${{ parameters.clusterName }}-hosted-cluster
-    text:
-      - title: Next Steps
-        content: |
-          Your cluster **${{ parameters.clusterName }}** has been submitted for provisioning!
+          **After pushing to git:**
+          - ArgoCD will detect the new files in ~2-3 minutes
+          - The HostedCluster and NodePool will be created automatically
+          - Control plane pods deploy (~5 minutes)
+          - Worker VMs created (~5 minutes)
+          - Cluster fully available (~15-20 minutes total)
 
-          **What happens next:**
-          1. ArgoCD will detect the new configuration in ~2-3 minutes
-          2. The HostedCluster and NodePool will be created
-          3. Control plane pods will deploy (~5 minutes)
-          4. Worker VMs will be created (~5 minutes)
-          5. Cluster will be fully available (~15-20 minutes total)
-
-          **Monitor progress:**
-          - Check ArgoCD for sync status
-          - Watch the HostedCluster resource
-          - View worker VMs in OpenShift Virtualization console
-
-          Run this command to monitor:
+          **Monitor deployment:**
           ```bash
           oc get hostedcluster ${{ parameters.clusterName }} -n clusters-${{ parameters.clusterName }} -w
           ```
