@@ -8,10 +8,5 @@ data:
     includes:
       - dynamic-plugins.default.yaml
     plugins:
-      - package: '@backstage/plugin-scaffolder-backend-module-github-dynamic@npm:^0.2.0'
+      - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
         disabled: false
-        pluginConfig:
-          scaffolder:
-            defaultAuthor:
-              name: Red Hat Developer Hub
-              email: developer-hub@redhat.com
