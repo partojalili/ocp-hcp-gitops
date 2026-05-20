@@ -17,4 +17,4 @@ spec:
     dynamicPluginsConfigMapName: backstage-dynamic-plugins
     extraEnvs:
       secrets:
-        - name: backstage-github-secret
+        - name: backstage-github-app

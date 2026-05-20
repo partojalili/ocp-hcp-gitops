@@ -8,7 +8,13 @@ data:
     integrations:
       github:
         - host: github.com
-          token: ${GITHUB_TOKEN}
+          apps:
+            - appId: ${APP_ID}
+              clientId: ${CLIENT_ID}
+              clientSecret: ${CLIENT_SECRET}
+              webhookSecret: ${WEBHOOK_SECRET}
+              privateKey: |
+                ${PRIVATE_KEY}
 
     # Scaffolder configuration for git operations
     scaffolder:
