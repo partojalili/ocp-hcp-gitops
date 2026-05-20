@@ -4,26 +4,33 @@ This directory contains a reusable template for provisioning OpenShift Hosted Co
 
 ## Quick Start
 
-**IMPORTANT:** The `provision-cluster.sh` script creates the cluster **configuration files only**. The actual cluster deployment happens in Step 3 below after you seal the secrets.
+**IMPORTANT:** The `provision-cluster.sh` script creates the cluster **configuration files only**. The actual cluster deployment happens in Step 4 below.
 
-### Complete Workflow
+### Complete Workflow (Using ArgoCD)
 
 ```bash
 # Step 1: Create cluster configuration directory
 cd hcp-template
 ./provision-cluster.sh -n my-cluster
 
-# Step 2: Add pull secret and seal it (REQUIRED before deployment)
+# Step 2: Seal secrets (REQUIRED before deployment)
 cd ../clusters/my-cluster
 cp ~/Downloads/pull-secret.txt ./
 ./scripts/seal-secrets.sh
 
-# Step 3: Deploy the cluster (actual provisioning starts here)
+# Step 3: Commit to Git (REQUIRED for ArgoCD - ArgoCD pulls from Git, not local files)
+git add .
+git commit -m "Add my-cluster configuration"
+git push
+
+# Step 4: Deploy the cluster (actual provisioning starts here)
 oc apply -f argocd/application.yaml
 
-# Step 4: Monitor deployment
+# Step 5: Monitor deployment
 oc get hostedcluster my-cluster -n clusters -w
 ```
+
+**Why commit to Git?** ArgoCD reads manifests from the Git repository (`repoURL: https://github.com/partojalili/ocp-hcp-gitops.git`), not from your local filesystem. Without committing, ArgoCD won't find the sealed secret files and deployment will fail.
 
 The `provision-cluster.sh` script will:
 1. Auto-detect your environment's base domain
@@ -108,15 +115,34 @@ cp ~/Downloads/pull-secret.txt ./pull-secret.txt
 
 This creates `base/pull-secret-sealed.yaml` and `base/ssh-key-sealed.yaml` which are safe to commit to Git.
 
-### Step 2: Commit to Git (Optional - for GitOps)
+### Step 2: Commit to Git (REQUIRED for ArgoCD)
 
-If using ArgoCD for GitOps deployment:
+**⚠️ CRITICAL:** If using ArgoCD, you MUST commit the sealed secrets to Git before deploying. ArgoCD pulls manifests from Git, not from your local filesystem.
 
 ```bash
 git add .
-git commit -m "Add CLUSTER_NAME cluster configuration"
+git commit -m "Add CLUSTER_NAME cluster configuration with sealed secrets"
 git push
 ```
+
+**Why is this required?**
+
+The ArgoCD Application is configured to pull from Git:
+```yaml
+source:
+  repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+  targetRevision: main
+  path: clusters/CLUSTER_NAME
+```
+
+The kustomization includes the sealed secrets:
+```yaml
+resources:
+  - pull-secret-sealed.yaml  # ArgoCD looks for this in Git
+  - ssh-key-sealed.yaml      # ArgoCD looks for this in Git
+```
+
+If you skip this step, ArgoCD will fail with: "unable to find resource pull-secret-sealed.yaml"
 
 ### Step 3: Deploy the Cluster (Actual Provisioning Starts Here)
 
@@ -125,16 +151,24 @@ git push
 **Option A: Using ArgoCD (GitOps - Recommended)**
 
 ```bash
+# After committing to Git (Step 2)
 oc apply -f argocd/application.yaml
 ```
 
-ArgoCD will automatically sync from Git and create the HostedCluster and NodePool resources, which triggers the cluster provisioning.
+ArgoCD will:
+1. Sync from Git repository
+2. Read the sealed secrets from Git
+3. Create the HostedCluster and NodePool resources
+4. Trigger cluster provisioning
 
-**Option B: Manual Deployment with Kustomize**
+**Option B: Manual Deployment with Kustomize (Git not required)**
 
 ```bash
+# Deploy directly from local filesystem (no Git needed)
 oc apply -k .
 ```
+
+This reads from your local files, so Git commit is not required.
 
 ### Step 4: Monitor Cluster Provisioning
 
