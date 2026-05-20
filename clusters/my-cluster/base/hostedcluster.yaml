@@ -2,7 +2,7 @@ apiVersion: hypershift.openshift.io/v1beta1
 kind: HostedCluster
 metadata:
   name: my-cluster
-  namespace: clusters
+  namespace: clusters-my-cluster
 spec:
   # OCP 4.19 release image (latest supported)
   release:

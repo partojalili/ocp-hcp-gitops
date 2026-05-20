@@ -75,7 +75,7 @@ echo "Creating temporary secret..."
 
 oc create secret docker-registry my-cluster-pull-secret \
   --from-file=.dockerconfigjson=$PULL_SECRET_FILE \
-  --namespace=clusters \
+  --namespace=clusters-my-cluster \
   --dry-run=client -o yaml > pull-secret-temp.yaml
 
 echo "Sealing secret..."
@@ -108,7 +108,7 @@ if [ -n "$SSH_KEY" ]; then
 
     oc create secret generic my-cluster-ssh-key \
       --from-file=id_rsa.pub=$SSH_KEY \
-      --namespace=clusters \
+      --namespace=clusters-my-cluster \
       --dry-run=client -o yaml > ssh-key-temp.yaml
 
     echo "Sealing secret..."
