@@ -27,7 +27,7 @@ git push
 oc apply -f argocd/application.yaml
 
 # Step 5: Monitor deployment
-oc get hostedcluster my-cluster -n clusters -w
+oc get hostedcluster my-cluster -n clusters-my-cluster -w
 ```
 
 **Why commit to Git?** ArgoCD reads manifests from the Git repository (`repoURL: https://github.com/partojalili/ocp-hcp-gitops.git`), not from your local filesystem. Without committing, ArgoCD won't find the sealed secret files and deployment will fail.
@@ -37,6 +37,7 @@ The `provision-cluster.sh` script will:
 2. Create a new cluster configuration directory in `../clusters/my-cluster/`
 3. Generate manifest files with your cluster name and settings
 4. Configure 2 worker nodes with 4 cores and 8GB RAM (default)
+5. Create a dedicated namespace: `clusters-my-cluster` (each cluster gets its own namespace for better isolation)
 
 ## Usage
 
@@ -176,16 +177,16 @@ Watch the cluster provisioning:
 
 ```bash
 # Watch HostedCluster status
-oc get hostedcluster CLUSTER_NAME -n clusters -w
+oc get hostedcluster CLUSTER_NAME -n clusters-CLUSTER_NAME -w
 
 # Watch NodePool status
-oc get nodepool CLUSTER_NAME-workers -n clusters -w
+oc get nodepool CLUSTER_NAME-workers -n clusters-CLUSTER_NAME -w
 
-# Check control plane pods
-oc get pods -n clusters-CLUSTER_NAME
+# Check control plane pods (note: control plane namespace has extra hyphen)
+oc get pods -n clusters-CLUSTER_NAME-CLUSTER_NAME
 
 # Get kubeconfig (after cluster is ready)
-oc extract secret/CLUSTER_NAME-admin-kubeconfig -n clusters --to=-
+oc extract secret/CLUSTER_NAME-admin-kubeconfig -n clusters-CLUSTER_NAME --to=-
 ```
 
 ## Directory Structure
@@ -195,7 +196,7 @@ After running `provision-cluster.sh` (Step 1), your cluster directory will conta
 ```
 clusters/CLUSTER_NAME/
 ├── base/
-│   ├── namespace.yaml
+│   ├── namespace.yaml                # Creates namespace: clusters-CLUSTER_NAME
 │   ├── hostedcluster.yaml
 │   ├── nodepool.yaml
 │   ├── pull-secret-sealed.yaml      # Created by seal-secrets.sh
@@ -216,6 +217,8 @@ clusters/CLUSTER_NAME/
 ├── kustomization.yaml
 └── pull-secret.txt                   # You provide this (not committed)
 ```
+
+**Note:** Each cluster gets its own namespace (`clusters-CLUSTER_NAME`) for better isolation. This prevents conflicts when deploying multiple clusters.
 
 ## Cluster Naming Convention
 
@@ -251,16 +254,17 @@ To remove a provisioned cluster:
 # Delete the ArgoCD application (if using GitOps)
 oc delete application CLUSTER_NAME-hosted-cluster -n openshift-gitops
 
-# Delete the cluster resources
-oc delete hostedcluster CLUSTER_NAME -n clusters
-oc delete nodepool CLUSTER_NAME-workers -n clusters
+# Delete the entire namespace (removes all cluster resources)
+oc delete namespace clusters-CLUSTER_NAME
 
-# Remove finalizers if stuck
-oc patch hostedcluster CLUSTER_NAME -n clusters --type json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+# If namespace is stuck, remove finalizers
+oc patch namespace clusters-CLUSTER_NAME --type json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
 
 # Remove the cluster directory
 rm -rf ../clusters/CLUSTER_NAME
 ```
+
+**Tip:** Deleting the namespace removes the HostedCluster, NodePool, and all secrets in one command.
 
 ## Troubleshooting
 
@@ -279,10 +283,10 @@ oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.
 **Issue: Cluster provisioning stuck**
 ```bash
 # Check HostedCluster status
-oc get hostedcluster CLUSTER_NAME -n clusters -o yaml
+oc get hostedcluster CLUSTER_NAME -n clusters-CLUSTER_NAME -o yaml
 
 # Check control plane pods
-oc get pods -n clusters-CLUSTER_NAME
+oc get pods -n clusters-CLUSTER_NAME-CLUSTER_NAME
 
 # Check events
 oc get events -n clusters-CLUSTER_NAME --sort-by='.lastTimestamp'
@@ -298,12 +302,31 @@ oc get events -n clusters-CLUSTER_NAME --sort-by='.lastTimestamp'
 
 ## Prerequisites
 
-- ACM 2.10+ (tested with 2.16) installed on hub cluster
-- MultiCluster Engine (MCE) 2.5+ (tested with 2.11)
-- OpenShift Virtualization operator installed
-- OpenShift GitOps operator installed (if using ArgoCD)
-- Sealed Secrets controller installed
-- Storage classes available:
+**⚠️ IMPORTANT:** Before using this template, ensure all prerequisites are met.
+
+### Quick Prerequisites Check
+
+1. **Sealed Secrets controller must be installed**:
+   ```bash
+   oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
+   ```
+
+3. **kubeseal CLI must be installed**:
+   ```bash
+   brew install kubeseal  # macOS
+   ```
+
+### Full Prerequisites List
+
+See [PREREQUISITES.md](PREREQUISITES.md) for detailed prerequisites and verification steps:
+
+- ✅ **ACM 2.10+** (tested with 2.16) installed on hub cluster
+- ✅ **MultiCluster Engine (MCE) 2.5+** (tested with 2.11)
+- ✅ **OpenShift Virtualization** operator installed
+- ✅ **OpenShift GitOps** operator installed (if using ArgoCD)
+- ✅ **Sealed Secrets controller** installed
+- ✅ **kubeseal CLI** installed locally
+- ✅ **Storage classes** available:
   - `lvms-vg1` for etcd
   - `ocs-external-storagecluster-ceph-rbd` for root volumes
 

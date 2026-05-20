@@ -2,7 +2,7 @@ apiVersion: hypershift.openshift.io/v1beta1
 kind: NodePool
 metadata:
   name: CLUSTER_NAME-workers
-  namespace: clusters
+  namespace: clusters-CLUSTER_NAME
 spec:
   # Reference to the HostedCluster
   clusterName: CLUSTER_NAME
