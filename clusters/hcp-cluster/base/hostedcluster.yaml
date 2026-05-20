@@ -8,9 +8,9 @@ metadata:
     app.kubernetes.io/managed-by: backstage
     provisioned-by: developer-hub
 spec:
-  # OCP 4.19 release image (multi-arch for KubeVirt compatibility)
+  # OCP 4.19 release image
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.19.0-multi
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
 
   # Pull secret reference
   pullSecret:
