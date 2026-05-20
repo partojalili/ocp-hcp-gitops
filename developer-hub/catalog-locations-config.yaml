@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backstage-catalog-locations
+  namespace: rhdh-operator
+data:
+  app-config-catalog.yaml: |
+    catalog:
+      # Catalog refresh interval (5 minutes)
+      providers:
+        github:
+          providerId:
+            organization: 'partojalili'
+            catalogPath: '/developer-hub/templates/**/template.yaml'
+            filters:
+              branch: 'main'
+              repository: 'ocp-hcp-gitops'
+            schedule:
+              frequency:
+                minutes: 5
+              timeout:
+                minutes: 3
+
+      # Direct locations for templates
+      locations:
+        # OpenShift HCP Cluster Template
+        - type: url
+          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/hcp-cluster-template/template.yaml
+          rules:
+            - allow: [Template]

@@ -246,6 +246,125 @@ oc delete namespace rhdh-operator
 - [Backstage Official Docs](https://backstage.io/docs)
 - [RHDH Operator GitHub](https://github.com/redhat-developer/rhdh-operator)
 
+## Self-Service Cluster Provisioning
+
+Developer Hub includes a Software Template for provisioning OpenShift Hosted Control Plane (HCP) clusters through a web form.
+
+### Prerequisites for Self-Service
+
+1. **GitHub Personal Access Token** (for committing cluster configs):
+   ```bash
+   # Create token at: https://github.com/settings/tokens/new
+   # Required scope: 'repo' (Full control of private repositories)
+   # Expiration: 90 days (recommended)
+   
+   # Update the secret with your token:
+   # Edit developer-hub/github-integration-secret.yaml
+   # Replace REPLACE_WITH_YOUR_GITHUB_TOKEN with your actual token
+   
+   oc apply -f github-integration-secret.yaml
+   ```
+
+2. **Apply GitHub Integration Config**:
+   ```bash
+   oc apply -f github-integration-config.yaml
+   ```
+
+3. **Apply Catalog Locations Config**:
+   ```bash
+   oc apply -f catalog-locations-config.yaml
+   ```
+
+4. **Update Backstage Instance**:
+   ```bash
+   oc apply -f backstage-instance.yaml
+   
+   # Wait for pod to restart (~2 minutes)
+   oc get pods -n rhdh-operator -w
+   ```
+
+### Using the Self-Service Portal
+
+1. **Open Developer Hub**:
+   ```bash
+   echo "https://$(oc get route backstage-developer-hub -n rhdh-operator -o jsonpath='{.spec.host}')"
+   ```
+
+2. **Create a New Cluster**:
+   - Click **"Create Component"** or **"Create..."**
+   - Select **"OpenShift HCP Cluster"** template
+   
+3. **Fill the Form**:
+   - **Cluster Name**: e.g., `dev-cluster` (lowercase, alphanumeric, hyphens)
+   - **Base Domain**: e.g., `apps.cluster-abc.redhat.com`
+   - **Pull Secret**: Paste from https://console.redhat.com/openshift/install/pull-secret
+   - **Worker Nodes**: Number of worker VMs (default: 2)
+   - **CPU Cores**: Cores per worker (default: 4)
+   - **Memory**: GiB per worker (default: 8)
+   - **Repository URL**: Git repo for cluster configs
+
+4. **Submit**:
+   - Developer Hub commits the config to `clusters/{cluster-name}/`
+   - ArgoCD detects changes (~2-3 minutes)
+   - ACM/HyperShift provisions the cluster (~15-20 minutes)
+
+5. **Monitor Progress**:
+   ```bash
+   # Watch HostedCluster status
+   oc get hostedcluster {cluster-name} -n clusters-{cluster-name} -w
+   
+   # Check ArgoCD Application
+   oc get application {cluster-name}-hosted-cluster -n openshift-gitops
+   
+   # View worker VMs
+   oc get vm -n clusters-{cluster-name}
+   ```
+
+### What Gets Created
+
+When you submit the form, Developer Hub automatically creates:
+
+```
+clusters/{cluster-name}/
+├── base/
+│   ├── namespace.yaml              # Namespace: clusters-{cluster-name}
+│   ├── pull-secret.yaml            # Pull secret from form
+│   ├── ssh-key.yaml                # SSH key for node access
+│   ├── hostedcluster.yaml          # HostedCluster CR with your specs
+│   ├── nodepool.yaml               # NodePool with CPU/memory from form
+│   └── kustomization.yaml          # Kustomize config
+└── argocd/
+    └── application.yaml            # ArgoCD Application for auto-sync
+```
+
+### End-to-End Flow
+
+```
+User fills form → Developer Hub commits to Git → ArgoCD syncs → ACM deploys → Cluster ready
+```
+
+**Timeline**:
+- Git commit: Instant
+- ArgoCD detection: ~2-3 minutes
+- Control plane deployment: ~5 minutes
+- Worker VMs creation: ~5 minutes
+- Full cluster available: **~15-20 minutes**
+
+### Template Location
+
+The cluster provisioning template is stored at:
+```
+developer-hub/templates/hcp-cluster-template/
+├── template.yaml                   # Software Template definition
+└── skeleton/                       # Template files
+    ├── base/                       # Kubernetes manifests
+    └── argocd/                     # ArgoCD Application
+```
+
+To modify the template form or default values, edit `template.yaml`.
+
+---
+
 ## Support
 
 For issues and questions:

@@ -12,3 +12,8 @@ spec:
       mountPath: /opt/app-root/src
       configMaps:
         - name: backstage-guest-auth-config
+        - name: backstage-github-integration
+        - name: backstage-catalog-locations
+    extraEnvs:
+      secrets:
+        - name: backstage-github-secret
