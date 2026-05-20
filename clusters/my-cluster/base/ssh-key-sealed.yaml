@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: my-cluster-ssh-key
+  namespace: clusters
+spec:
+  encryptedData:
+    id_rsa.pub: AgCZBnbknuEOiKmZ9j22buztUWokfkeSEoRJ/7QjQd7TMD8rw9ffJR3q6JR97gwKz85jpQ6rtFKBji+8QEC4cWn0lxj2BjMsAkaHzDBM7t2vUrnGwolD4PkkJqEkmWspESt1BjZXTAj3ledbhaJjhQNJiu8P8Rz0sr5pb9o4UeGn9ZpzAgAR4TyO5ZeFK7lxWI0gRyIf9V+eYeYxlBR/PFPzgltxMbyakuERXW5HC3fH9RB3CP9vu9ziVJWqbZrRjD+vSs4bp5Oi6+sA2RvLthBLz5Bdj48rqz4uBJL/OiwdJlG8FXAIl7OgnsRyJirdYHflPH18irrZhWckixK6AXe3f939h0Ds1ysIO5h/K9xcXx34GRQXFkmpvyDJEIEfZg1bQFhLWXSKubYitqWM7vIiDNTvc7NIMmu0PeYJCML3aK94Pd2z3qbbixjBHZq4U2+LH1SeyiusnJCpj8vjQYhpiWkF8YD2D2RM1ylN/QX7lVFizcw+jAR1Oa1hTxIqn0Kd6urI69lO2tKf9V1Mi1Xn4bdJkdz/6N2mQIpBKUE1x99Hlp6DfHYjUW8PTBaJo2vNHuAHogRroati/dK2TNjdYSFxKiN3+AyjJLAw5d31S20lJfs2QelKaGjG7tWvCu9cVsxo9IfQaxCqXXmozhPEuTkOCVUQJRgx6B7EH46NmRnDw5YRwAgehHrMcC7asS9R43Q/R/m6xopNo26dJQnby2aKGVR888hVf0dV5uVX+onNpLhFJqKXQSrO2wyGUBxXgn7vDh5UzKzn3pOoaHJ9PAA8mCUAQa9D5PjNcEptI10rxjiy/Ttn8f7xuSPjaaYat5R8NA==
+  template:
+    metadata:
+      name: my-cluster-ssh-key
+      namespace: clusters
