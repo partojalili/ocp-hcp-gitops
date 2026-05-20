@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hcp-clusters
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        revision: main
+        directories:
+          - path: clusters/*
+  template:
+    metadata:
+      name: '{{.path.basename}}-hosted-cluster'
+      labels:
+        app.kubernetes.io/name: '{{.path.basename}}'
+        app.kubernetes.io/managed-by: applicationset
+        provisioned-by: developer-hub
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        path: '{{.path.path}}/base'
+        targetRevision: main
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'clusters-{{.path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

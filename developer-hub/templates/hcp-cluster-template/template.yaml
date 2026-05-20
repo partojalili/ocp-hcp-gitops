@@ -129,6 +129,10 @@ spec:
 
           Provisioned via Red Hat Developer Hub
         targetPath: clusters/${{ parameters.clusterName }}
+        update: true
+        sourcePath: .
+        gitAuthorName: Red Hat Developer Hub
+        gitAuthorEmail: developer-hub@redhat.com
 
   output:
     links:
