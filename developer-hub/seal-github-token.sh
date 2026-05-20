@@ -117,6 +117,13 @@ fi
 
 echo ""
 
+# Determine script directory and project root
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+
+print_info "Project root: $PROJECT_ROOT"
+print_info "Script directory: $SCRIPT_DIR"
+
 # Create temporary secret file
 print_step "Creating temporary secret..."
 TEMP_SECRET="/tmp/github-secret-$$.yaml"
@@ -136,7 +143,9 @@ print_info "Temporary secret created: $TEMP_SECRET"
 
 # Seal the secret
 print_step "Sealing the secret..."
-OUTPUT_FILE="developer-hub/github-integration-sealed-secret.yaml"
+OUTPUT_FILE="$SCRIPT_DIR/github-integration-sealed-secret.yaml"
+
+print_info "Output file will be: $OUTPUT_FILE"
 
 kubeseal -f "$TEMP_SECRET" \
          -w "$OUTPUT_FILE" \
@@ -173,8 +182,13 @@ echo "   git commit -m 'Add sealed GitHub token for Developer Hub'"
 echo "   git push"
 echo ""
 echo "4. Apply other Developer Hub configs:"
-echo "   oc apply -f developer-hub/github-integration-config.yaml"
-echo "   oc apply -f developer-hub/catalog-locations-config.yaml"
-echo "   oc apply -f developer-hub/backstage-instance.yaml"
+echo "   cd $SCRIPT_DIR"
+echo "   oc apply -f github-integration-config.yaml"
+echo "   oc apply -f catalog-locations-config.yaml"
+echo "   oc apply -f backstage-instance.yaml"
+echo ""
+echo "5. Wait for pod to restart:"
+echo "   oc get pods -n rhdh-operator -w"
 echo ""
 print_info "The sealed secret is encrypted and safe to commit to git!"
+print_info "File location: $OUTPUT_FILE"
