@@ -1,2 +1,0 @@
-# This file keeps the clusters/ directory in Git
-# Individual cluster directories will be created by the provision-cluster.sh script

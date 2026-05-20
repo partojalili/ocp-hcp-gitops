@@ -1,0 +1,14 @@
+apiVersion: rhdh.redhat.com/v1alpha3
+kind: Backstage
+metadata:
+  name: developer-hub
+  namespace: rhdh-operator
+spec:
+  application:
+    replicas: 1
+    route:
+      enabled: true
+    appConfig:
+      mountPath: /opt/app-root/src
+      configMaps:
+        - name: backstage-guest-auth-config
