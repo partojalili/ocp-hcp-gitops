@@ -121,33 +121,6 @@ spec:
           memoryGi: ${{ parameters.memoryGi }}
           repoUrl: ${{ parameters.repoUrl }}
 
-    - id: seal-secrets
-      name: Seal Secrets with Kubeseal
-      action: shell:command
-      input:
-        command: bash
-        args:
-          - '-c'
-          - |
-            # Seal the pull secret
-            kubectl create secret docker-registry ${{ parameters.clusterName }}-pull-secret \
-              --docker-server=registry.redhat.io \
-              --docker-username=unused \
-              --docker-password=unused \
-              --from-literal=.dockerconfigjson='${{ parameters.pullSecret }}' \
-              --namespace=clusters-${{ parameters.clusterName }} \
-              --dry-run=client -o yaml | \
-            kubeseal --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller \
-              --format=yaml > base/pull-secret.yaml
-
-            # Seal the SSH key
-            kubectl create secret generic ${{ parameters.clusterName }}-ssh-key \
-              --from-literal=id_rsa.pub='${{ parameters.sshPublicKey }}' \
-              --namespace=clusters-${{ parameters.clusterName }} \
-              --dry-run=client -o yaml | \
-            kubeseal --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller \
-              --format=yaml > base/ssh-key.yaml
-
     - id: publish
       name: Publish to GitHub
       action: publish:github:pull-request
@@ -195,15 +168,36 @@ spec:
           - Memory per Worker: ${{ parameters.memoryGi }}Gi
 
           **What happens next:**
-          1. ✅ Secrets sealed with Kubeseal for security
-          2. ✅ Cluster configuration committed to GitHub (sealed secrets only)
-          3. ⏳ ArgoCD will detect the new configuration (~2-3 minutes)
+          1. ✅ Pull request created with cluster configuration
+          2. ⚠️ **IMPORTANT: Manually seal secrets before merging** (see instructions below)
+          3. ⏳ After merge, ArgoCD will detect the new configuration (~2-3 minutes)
           4. ⏳ HostedCluster and NodePool will be created
           5. ⏳ Control plane pods will deploy (~5 minutes)
           6. ⏳ Worker VMs will be created (~5 minutes)
           7. ✅ Cluster will be fully available (~15-20 minutes total)
 
-          **Security:** Your pull secret and SSH key have been encrypted with Sealed Secrets. Only encrypted data is stored in Git.
+          **SECURITY NOTICE:** The PR contains unsealed secrets. Before merging, seal them using:
+          ```bash
+          # Checkout the PR branch
+          gh pr checkout <PR-NUMBER>
+
+          # Go to cluster folder
+          cd clusters/${{ parameters.clusterName }}
+
+          # Seal the secrets
+          ../../developer-hub/templates/hcp-cluster-template/seal-secrets.sh \
+            "${{ parameters.clusterName }}" \
+            "$(cat base/pull-secret.yaml | grep '.dockerconfigjson:' | awk '{print $2}')" \
+            "$(cat base/ssh-key.yaml | grep 'id_rsa.pub:' | awk '{print $2}')"
+
+          # Commit and push sealed secrets
+          git add base/pull-secret.yaml base/ssh-key.yaml
+          git commit -m "Seal secrets with Kubeseal"
+          git push
+
+          # Now merge the PR
+          gh pr merge --squash
+          ```
 
           **Monitor progress:**
           ```bash
