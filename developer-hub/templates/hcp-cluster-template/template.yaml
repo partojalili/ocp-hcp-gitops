@@ -19,6 +19,7 @@ spec:
         - clusterName
         - baseDomain
         - pullSecret
+        - sshPublicKey
       properties:
         clusterName:
           title: Cluster Name
@@ -43,6 +44,15 @@ spec:
           ui:options:
             rows: 5
           ui:help: 'Paste your pull secret from https://console.redhat.com/openshift/install/pull-secret'
+
+        sshPublicKey:
+          title: SSH Public Key
+          type: string
+          description: SSH public key for node access (e.g., ssh-rsa AAAA...)
+          ui:widget: textarea
+          ui:options:
+            rows: 3
+          ui:help: 'Paste your SSH public key (contents of ~/.ssh/id_rsa.pub)'
 
     - title: Worker Node Configuration
       required:
@@ -105,10 +115,38 @@ spec:
           clusterName: ${{ parameters.clusterName }}
           baseDomain: ${{ parameters.baseDomain }}
           pullSecret: ${{ parameters.pullSecret }}
+          sshPublicKey: ${{ parameters.sshPublicKey }}
           workerReplicas: ${{ parameters.workerReplicas }}
           cpuCores: ${{ parameters.cpuCores }}
           memoryGi: ${{ parameters.memoryGi }}
           repoUrl: ${{ parameters.repoUrl }}
+
+    - id: seal-secrets
+      name: Seal Secrets with Kubeseal
+      action: shell:command
+      input:
+        command: bash
+        args:
+          - '-c'
+          - |
+            # Seal the pull secret
+            kubectl create secret docker-registry ${{ parameters.clusterName }}-pull-secret \
+              --docker-server=registry.redhat.io \
+              --docker-username=unused \
+              --docker-password=unused \
+              --from-literal=.dockerconfigjson='${{ parameters.pullSecret }}' \
+              --namespace=clusters-${{ parameters.clusterName }} \
+              --dry-run=client -o yaml | \
+            kubeseal --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller \
+              --format=yaml > base/pull-secret.yaml
+
+            # Seal the SSH key
+            kubectl create secret generic ${{ parameters.clusterName }}-ssh-key \
+              --from-literal=id_rsa.pub='${{ parameters.sshPublicKey }}' \
+              --namespace=clusters-${{ parameters.clusterName }} \
+              --dry-run=client -o yaml | \
+            kubeseal --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller \
+              --format=yaml > base/ssh-key.yaml
 
     - id: publish
       name: Publish to GitHub
@@ -157,12 +195,15 @@ spec:
           - Memory per Worker: ${{ parameters.memoryGi }}Gi
 
           **What happens next:**
-          1. ✅ Cluster configuration committed to GitHub automatically
-          2. ⏳ ArgoCD will detect the new configuration (~2-3 minutes)
-          3. ⏳ HostedCluster and NodePool will be created
-          4. ⏳ Control plane pods will deploy (~5 minutes)
-          5. ⏳ Worker VMs will be created (~5 minutes)
-          6. ✅ Cluster will be fully available (~15-20 minutes total)
+          1. ✅ Secrets sealed with Kubeseal for security
+          2. ✅ Cluster configuration committed to GitHub (sealed secrets only)
+          3. ⏳ ArgoCD will detect the new configuration (~2-3 minutes)
+          4. ⏳ HostedCluster and NodePool will be created
+          5. ⏳ Control plane pods will deploy (~5 minutes)
+          6. ⏳ Worker VMs will be created (~5 minutes)
+          7. ✅ Cluster will be fully available (~15-20 minutes total)
+
+          **Security:** Your pull secret and SSH key have been encrypted with Sealed Secrets. Only encrypted data is stored in Git.
 
           **Monitor progress:**
           ```bash
