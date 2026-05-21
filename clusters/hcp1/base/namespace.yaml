@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: clusters-hcp1
-  labels:
-    name: clusters-hcp1
