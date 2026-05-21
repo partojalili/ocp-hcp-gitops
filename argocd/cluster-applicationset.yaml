@@ -11,7 +11,7 @@ spec:
         repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
         revision: main
         directories:
-          - path: clusters/*
+          - path: clusters/devhub/*
   template:
     metadata:
       name: '{{.path.basename}}-hosted-cluster'

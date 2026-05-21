@@ -139,7 +139,7 @@ spec:
           - **Domain**: ${{ parameters.baseDomain }}
 
           Provisioned via Red Hat Developer Hub
-        targetPath: clusters/${{ parameters.clusterName }}
+        targetPath: clusters/devhub/${{ parameters.clusterName }}
         update: true
         sourcePath: .
         gitAuthorName: Red Hat Developer Hub
@@ -182,7 +182,7 @@ spec:
           gh pr checkout <PR-NUMBER>
 
           # Go to cluster folder
-          cd clusters/${{ parameters.clusterName }}
+          cd clusters/devhub/${{ parameters.clusterName }}
 
           # Seal the secrets
           ../../developer-hub/templates/hcp-cluster-template/seal-secrets.sh \
