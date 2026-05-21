@@ -53,13 +53,13 @@ spec:
   infrastructureAvailabilityPolicy: HighlyAvailable
 
   # Service publishing strategy
+  # NodePort is auto-assigned by Kubernetes from available range (30000-32767)
   services:
     - service: APIServer
       servicePublishingStrategy:
         type: NodePort
         nodePort:
           address: 10.10.10.10
-          port: 30443
     - service: OAuthServer
       servicePublishingStrategy:
         type: Route

@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: clusters-hcp-dh1
-  labels:
-    app.kubernetes.io/name: hcp-dh1
-    app.kubernetes.io/managed-by: backstage
