@@ -1,0 +1,74 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: my-cluster
+  namespace: clusters-my-cluster
+spec:
+  # OCP 4.19 release image (latest supported)
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
+
+  # Pull secret reference
+  pullSecret:
+    name: my-cluster-pull-secret
+
+  # SSH key for node access (optional)
+  sshKey:
+    name: my-cluster-ssh-key
+
+  # Networking configuration
+  networking:
+    clusterNetwork:
+      - cidr: 10.132.0.0/14
+    serviceNetwork:
+      - cidr: 172.31.0.0/16
+    networkType: OVNKubernetes
+
+  # DNS configuration
+  dns:
+    baseDomain: example.com
+
+  # Platform: OpenShift Virtualization (KubeVirt)
+  platform:
+    type: KubeVirt
+    kubevirt:
+      # Storage class for etcd
+      baseDomainPassthrough: true
+
+  # etcd configuration
+  etcd:
+    managed:
+      storage:
+        persistentVolume:
+          size: 16Gi
+          storageClassName: lvms-vg1
+        type: PersistentVolume
+    managementType: Managed
+
+  # Control plane configuration
+  controllerAvailabilityPolicy: HighlyAvailable
+  infrastructureAvailabilityPolicy: HighlyAvailable
+
+  # Service publishing strategy
+  services:
+    - service: APIServer
+      servicePublishingStrategy:
+        type: NodePort
+        nodePort:
+          address: 10.10.10.10
+          port: 30443
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+
+  # FIPS mode (optional)
+  fips: false
+
+  # Autoscaling (optional)
+  autoscaling: {}
