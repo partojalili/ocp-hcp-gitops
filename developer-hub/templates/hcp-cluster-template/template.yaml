@@ -88,6 +88,7 @@ spec:
           default: 8
           enum:
             - 4
+            - 6
             - 8
             - 16
             - 32
