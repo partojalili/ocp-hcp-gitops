@@ -1,0 +1,17 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: hcp1
+  namespace: clusters-hcp1
+spec:
+  # Production-specific overrides
+  dns:
+    baseDomain: apps.cluster-q2pfv.dynamic2.redhatworkshops.io
+
+  # Production release image (update for specific patch version)
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
+
+  # High availability for production
+  controllerAvailabilityPolicy: HighlyAvailable
+  infrastructureAvailabilityPolicy: HighlyAvailable
