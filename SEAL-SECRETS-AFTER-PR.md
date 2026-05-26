@@ -10,7 +10,39 @@ When you submit a cluster provisioning request through Developer Hub, it creates
 - **Sealed secrets** can only be decrypted by your cluster's Sealed Secrets controller
 - Safe to commit to public repositories
 
-## Step-by-Step Instructions
+## ⚡ Quick Start (Automated Script)
+
+The easiest way is to use the automated script:
+
+```bash
+cd ~/ocp-hcp-gitops
+
+# Option 1: Auto-checkout PR and seal secrets
+./scripts/seal-pr-secrets.sh <PR-NUMBER>
+
+# Option 2: If already on PR branch
+./scripts/seal-pr-secrets.sh <cluster-name>
+
+# Example:
+./scripts/seal-pr-secrets.sh 13           # Checkout PR #13 and seal
+./scripts/seal-pr-secrets.sh devhub3      # Seal devhub3 (already on branch)
+```
+
+The script will:
+1. ✅ Checkout the PR (if PR number provided)
+2. ✅ Extract secrets from YAML files
+3. ✅ Seal them with kubeseal
+4. ✅ Replace plain-text with sealed secrets
+5. ✅ Show you the git diff
+6. ✅ Give you the exact commands to commit and merge
+
+Then just:
+```bash
+git push
+gh pr merge --squash
+```
+
+## Step-by-Step Instructions (Manual Method)
 
 ### 1. Submit the Form in Developer Hub
 
