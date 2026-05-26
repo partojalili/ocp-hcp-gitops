@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: ${{ values.repoUrl }}
     targetRevision: HEAD
-    path: clusters/${{ values.clusterName }}/base
+    path: clusters/devhub/${{ values.clusterName }}/base
   destination:
     server: https://kubernetes.default.svc
     namespace: clusters-${{ values.clusterName }}
