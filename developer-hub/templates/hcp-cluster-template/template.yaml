@@ -170,11 +170,12 @@ spec:
           **What happens next:**
           1. ✅ Pull request created with cluster configuration
           2. ⚠️ **REQUIRED: Seal the secrets before merging** (see instructions below)
-          3. ⏳ After merge, ArgoCD will detect the new configuration (~2-3 minutes)
-          4. ⏳ HostedCluster and NodePool will be created
-          5. ⏳ Control plane pods will deploy (~5 minutes)
-          6. ⏳ Worker VMs will be created (~5 minutes)
-          7. ✅ Cluster will be fully available (~15-20 minutes total)
+          3. 🔀 Merge the PR after sealing secrets
+          4. ⏳ ApplicationSet auto-detects new cluster (~30 seconds)
+          5. ⏳ ArgoCD syncs and creates HostedCluster (~1-2 minutes)
+          6. ⏳ Control plane pods deploy (~5 minutes)
+          7. ⏳ Worker VMs are created (~5 minutes)
+          8. ✅ Cluster fully available (~15-20 minutes total)
 
           **CRITICAL: Seal Secrets Before Merging**
 
@@ -195,8 +196,7 @@ spec:
           git push
           gh pr merge --squash
 
-          # Apply ArgoCD application to start deployment:
-          oc apply -f clusters/devhub/${{ parameters.clusterName }}/argocd/application.yaml
+          # ArgoCD ApplicationSet will auto-detect and deploy the cluster!
           ```
 
           **Example for this PR:**
@@ -205,7 +205,7 @@ spec:
           ./scripts/seal-pr-secrets.sh ${{ steps.publish.output.pullRequestNumber }}
           git push
           gh pr merge --squash
-          oc apply -f clusters/devhub/${{ parameters.clusterName }}/argocd/application.yaml
+          # ArgoCD will auto-deploy!
           ```
 
           **Why seal secrets?**
