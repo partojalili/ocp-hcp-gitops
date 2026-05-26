@@ -32,9 +32,8 @@ spec:
         baseDomain:
           title: Base Domain
           type: string
-          description: Base domain for the cluster (e.g., apps.cluster-abc.redhat.com)
-          default: apps.cluster-q2pfv.dynamic2.redhatworkshops.io
-          ui:help: 'The base domain for cluster DNS and routes'
+          description: Base domain for the cluster (must match your management cluster's apps domain)
+          ui:help: 'Get this from your management cluster: oc get ingresses.config.openshift.io cluster -o jsonpath={.spec.domain}'
 
         pullSecret:
           title: Pull Secret
@@ -152,10 +151,10 @@ spec:
         url: ${{ steps.publish.output.remoteUrl }}
       - title: Track Deployment Status
         icon: dashboard
-        url: https://console-openshift-console.apps.cluster-q2pfv.dynamic2.redhatworkshops.io/k8s/ns/clusters-${{ parameters.clusterName }}/hypershift.openshift.io~v1beta1~HostedCluster/${{ parameters.clusterName }}
+        url: https://console-openshift-console.${{ parameters.baseDomain }}/k8s/ns/clusters-${{ parameters.clusterName }}/hypershift.openshift.io~v1beta1~HostedCluster/${{ parameters.clusterName }}
       - title: ArgoCD Application
         icon: sync
-        url: https://openshift-gitops-server-openshift-gitops.apps.cluster-q2pfv.dynamic2.redhatworkshops.io/applications/${{ parameters.clusterName }}-hosted-cluster
+        url: https://openshift-gitops-server-openshift-gitops.${{ parameters.baseDomain }}/applications/${{ parameters.clusterName }}-hosted-cluster
     text:
       - title: Cluster Provisioning Started
         content: |
