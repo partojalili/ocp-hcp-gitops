@@ -130,31 +130,171 @@ Open the URL in your browser and click **"Enter as Guest"** to access Developer 
 |------|---------|
 | `operator-subscription.yaml` | Installs Red Hat Developer Hub Operator |
 | `guest-auth-config.yaml` | ConfigMap for guest authentication |
-| `backstage-instance.yaml` | Developer Hub instance with guest auth |
+| `github-integration-config.yaml` | GitHub App integration configuration |
+| `catalog-locations-config.yaml` | Catalog sources pointing to template repository |
+| `dynamic-plugins-config.yaml` | Dynamic plugins configuration |
+| `backstage-instance.yaml` | Developer Hub instance configuration |
+| `GITHUB-APP-SECRET-SETUP.md` | Complete guide for GitHub App secret setup |
+| `GITHUB-GITOPS-INTEGRATION.md` | GitOps workflow documentation |
 | `README.md` | This file - deployment instructions |
+| `templates/` | Software templates for cluster provisioning |
 
 ## Configuration
 
-### Authentication
+### GitHub Authentication Setup
 
-**Current:** Guest authentication (no login required)
+Red Hat Developer Hub requires GitHub authentication to access templates and perform GitOps operations. **For the full self-service cluster provisioning workflow, GitHub App authentication is required.**
 
-**To enable other authentication providers** (GitHub, GitLab, LDAP, etc.), update the `guest-auth-config.yaml` ConfigMap:
+#### Quick Comparison
 
-```yaml
-auth:
-  environment: production
-  providers:
-    github:
-      production:
-        clientId: ${GITHUB_CLIENT_ID}
-        clientSecret: ${GITHUB_CLIENT_SECRET}
-```
+| Feature | Simple Token | GitHub App ⭐ Recommended |
+|---------|-------------|------------|
+| **Setup Complexity** | ⭐ Easy (5 min) | ⭐⭐⭐ Moderate (15 min) |
+| **Webhook Support** | ❌ No | ✅ Yes - Real-time updates |
+| **Rate Limits** | 5,000/hour | 15,000/hour per repo |
+| **Production Ready** | ❌ Development only | ✅ Yes |
+| **Auto Catalog Refresh** | ❌ Manual (5 min interval) | ✅ Instant via webhooks |
+| **Audit Trail** | User commits | Bot commits |
+| **Use Case** | Testing/POC | Production/Enterprise |
 
-Then recreate the Developer Hub pod:
+---
+
+#### Option 1: GitHub App Authentication (Production) ⭐ Recommended
+
+**For complete setup instructions with detailed explanations, troubleshooting, and security best practices, see: [GITHUB-APP-SECRET-SETUP.md](./GITHUB-APP-SECRET-SETUP.md)**
+
+**Quick setup summary:**
+
+1. **Generate webhook secret:**
+   ```bash
+   openssl rand -base64 32
+   # Save this output for Step 2
+   ```
+
+2. **Create GitHub App** at https://github.com/settings/apps/new with:
+   - Homepage URL: `https://backstage-developer-hub-rhdh-operator.apps.YOUR-CLUSTER.com`
+   - Webhook URL: `https://backstage-developer-hub-rhdh-operator.apps.YOUR-CLUSTER.com/api/github/webhook`
+   - Webhook secret: (from Step 1)
+   - Permissions: Contents (R/W), Metadata (R), Pull requests (R/W), Webhooks (R/W)
+   - Events: Push, Pull request
+   
+3. **Collect credentials** from GitHub App settings:
+   - App ID
+   - Client ID  
+   - Client Secret (generate new)
+   - Private Key (download .pem file)
+   - Webhook Secret (from Step 1)
+
+4. **Install the app** on your `ocp-hcp-gitops` repository
+
+5. **Create the secret:**
+   ```bash
+   # Move downloaded private key
+   mv ~/Downloads/*.private-key.pem /tmp/github-app-private-key.pem
+   
+   # Create secret with all 5 fields
+   oc create secret generic backstage-github-app \
+     -n rhdh-operator \
+     --from-literal=APP_ID="123456" \
+     --from-literal=CLIENT_ID="Iv1.abc123def456" \
+     --from-literal=CLIENT_SECRET="ghs_your_secret_here" \
+     --from-literal=WEBHOOK_SECRET="your_webhook_secret" \
+     --from-file=PRIVATE_KEY=/tmp/github-app-private-key.pem
+   
+   # Clean up
+   rm /tmp/github-app-private-key.pem
+   ```
+
+6. **Verify the secret:**
+   ```bash
+   oc get secret backstage-github-app -n rhdh-operator -o jsonpath='{.data}' | jq -r 'keys'
+   # Should show: ["APP_ID", "CLIENT_ID", "CLIENT_SECRET", "PRIVATE_KEY", "WEBHOOK_SECRET"]
+   ```
+
+7. **Deploy Developer Hub:**
+   ```bash
+   oc apply -f backstage-instance.yaml
+   oc apply -f github-integration-config.yaml
+   oc apply -f catalog-locations-config.yaml
+   ```
+
+---
+
+#### Option 2: Simple Token Authentication (Development Only)
+
+**Use only for quick testing. Not suitable for production or self-service provisioning.**
+
+1. **Generate token** at https://github.com/settings/tokens/new
+   - Scope: `repo`
+   - Expiration: 90 days
+
+2. **Create secret:**
+   ```bash
+   oc create secret generic backstage-github-secret \
+     -n rhdh-operator \
+     --from-literal=GITHUB_TOKEN="ghp_your_token_here"
+   ```
+
+3. **Update GitHub integration to use token:**
+   ```bash
+   cat > /tmp/github-token-config.yaml <<'EOF'
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: backstage-github-integration
+     namespace: rhdh-operator
+   data:
+     app-config-github.yaml: |
+       integrations:
+         github:
+           - host: github.com
+             token: ${GITHUB_TOKEN}
+       scaffolder:
+         defaultAuthor:
+           name: Red Hat Developer Hub
+           email: developer-hub@redhat.com
+         defaultCommitMessage: 'Provisioned via Developer Hub'
+   EOF
+   
+   oc apply -f /tmp/github-token-config.yaml
+   ```
+
+4. **Update Backstage instance:**
+   ```bash
+   oc patch backstage developer-hub -n rhdh-operator --type=json -p '[
+     {"op": "replace", "path": "/spec/application/extraEnvs/secrets/0/name", "value": "backstage-github-secret"}
+   ]'
+   ```
+
+**Limitations:**
+- ⚠️ No webhooks - catalog refreshes every 5 minutes only
+- ⚠️ Lower rate limits
+- ⚠️ Commits appear as your personal account
+- ⚠️ Token expires every 90 days
+
+---
+
+#### Troubleshooting Authentication
+
+**Secret not found:**
 ```bash
-oc delete pod -l app.kubernetes.io/name=backstage -n rhdh-operator
+# Check which secrets exist
+oc get secrets -n rhdh-operator | grep github
+
+# Verify Backstage is looking for the right secret
+oc get backstage developer-hub -n rhdh-operator -o jsonpath='{.spec.application.extraEnvs.secrets[0].name}'
 ```
+
+**Authentication fails:**
+```bash
+# Check logs
+oc logs -n rhdh-operator deployment/backstage-developer-hub | grep -i "github\|auth" | tail -20
+
+# For GitHub App: Verify all 5 fields exist
+oc get secret backstage-github-app -n rhdh-operator -o jsonpath='{.data}' | jq 'keys'
+```
+
+**See [GITHUB-APP-SECRET-SETUP.md](./GITHUB-APP-SECRET-SETUP.md) for detailed troubleshooting.**
 
 ### Scaling
 
@@ -242,9 +382,16 @@ oc delete namespace rhdh-operator
 
 ## Additional Resources
 
+### Documentation in This Repository
+- **[GITHUB-APP-SECRET-SETUP.md](./GITHUB-APP-SECRET-SETUP.md)** - Detailed GitHub App setup with troubleshooting
+- **[GITHUB-GITOPS-INTEGRATION.md](./GITHUB-GITOPS-INTEGRATION.md)** - GitOps workflow and ArgoCD integration
+
+### Official Documentation
 - [Red Hat Developer Hub Documentation](https://access.redhat.com/documentation/en-us/red_hat_developer_hub)
 - [Backstage Official Docs](https://backstage.io/docs)
+- [Backstage GitHub Integration](https://backstage.io/docs/integrations/github/locations)
 - [RHDH Operator GitHub](https://github.com/redhat-developer/rhdh-operator)
+- [GitHub Apps Documentation](https://docs.github.com/en/apps)
 
 ## Self-Service Cluster Provisioning
 
