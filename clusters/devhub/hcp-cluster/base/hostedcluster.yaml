@@ -1,0 +1,77 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: hcp-cluster
+  namespace: clusters-hcp-cluster
+  labels:
+    app.kubernetes.io/name: hcp-cluster
+    app.kubernetes.io/managed-by: backstage
+    provisioned-by: developer-hub
+spec:
+  # OCP 4.19 release image (latest supported)
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
+
+  # Pull secret reference
+  pullSecret:
+    name: hcp-cluster-pull-secret
+
+  # SSH key for node access (optional)
+  sshKey:
+    name: hcp-cluster-ssh-key
+
+  # Networking configuration
+  networking:
+    clusterNetwork:
+      - cidr: 10.132.0.0/14
+    serviceNetwork:
+      - cidr: 172.31.0.0/16
+    networkType: OVNKubernetes
+
+  # DNS configuration
+  dns:
+    baseDomain: apps.cluster-q2pfv.dynamic2.redhatworkshops.io
+
+  # Platform: OpenShift Virtualization (KubeVirt)
+  platform:
+    type: KubeVirt
+    kubevirt:
+      baseDomainPassthrough: true
+
+  # etcd configuration
+  etcd:
+    managed:
+      storage:
+        persistentVolume:
+          size: 16Gi
+          storageClassName: lvms-vg1
+        type: PersistentVolume
+    managementType: Managed
+
+  # Control plane configuration
+  controllerAvailabilityPolicy: HighlyAvailable
+  infrastructureAvailabilityPolicy: HighlyAvailable
+
+  # Service publishing strategy
+  # NodePort is auto-assigned by Kubernetes from available range (30000-32767)
+  services:
+    - service: APIServer
+      servicePublishingStrategy:
+        type: NodePort
+        nodePort:
+          address: 10.10.10.10
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+
+  # FIPS mode
+  fips: false
+
+  # Autoscaling
+  autoscaling: {}
