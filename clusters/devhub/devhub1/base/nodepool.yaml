@@ -1,0 +1,51 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: NodePool
+metadata:
+  name: devhub1-workers
+  namespace: clusters-devhub1
+  labels:
+    app.kubernetes.io/name: devhub1
+    app.kubernetes.io/managed-by: backstage
+spec:
+  # Reference to the HostedCluster
+  clusterName: devhub1
+
+  # Number of worker nodes
+  replicas: 1
+
+  # OCP 4.19 release image (must match HostedCluster)
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
+
+  # Platform: KubeVirt
+  platform:
+    type: KubeVirt
+    kubevirt:
+      # VM compute resources
+      compute:
+        cores: 4
+        memory: 8Gi
+
+      # Root volume configuration
+      rootVolume:
+        persistent:
+          size: 120Gi
+          storageClass: ocs-external-storagecluster-ceph-rbd
+        type: Persistent
+
+      # Network interface
+      networkInterfaceMultiqueue: Enable
+
+  # Node management
+  management:
+    autoRepair: true
+    replace:
+      strategy: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 0
+    upgradeType: Replace
+
+  # Node labels
+  nodeLabels:
+    node-role.kubernetes.io/worker: ""
