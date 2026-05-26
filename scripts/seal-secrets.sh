@@ -82,6 +82,7 @@ echo "Sealing secret..."
 kubeseal --format=yaml \
   --controller-namespace=kube-system \
   --controller-name=sealed-secrets-controller \
+  --scope cluster-wide \
   < pull-secret-temp.yaml > base/pull-secret-sealed.yaml
 
 rm pull-secret-temp.yaml
@@ -118,6 +119,7 @@ if [ -n "$SSH_KEY" ]; then
     kubeseal --format=yaml \
       --controller-namespace=kube-system \
       --controller-name=sealed-secrets-controller \
+      --scope cluster-wide \
       < ssh-key-temp.yaml > base/ssh-key-sealed.yaml
 
     rm ssh-key-temp.yaml
