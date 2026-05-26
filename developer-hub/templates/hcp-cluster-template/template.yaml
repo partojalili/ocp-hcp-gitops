@@ -179,51 +179,41 @@ spec:
 
           **CRITICAL: Seal Secrets Before Merging**
 
-          The PR currently contains plain-text secrets. You MUST seal them before merging:
+          The PR contains plain-text secrets. Use the automated script to seal them:
 
           ```bash
-          # 1. Get the PR number from the link above, then checkout
-          gh pr checkout <PR-NUMBER>
+          # Get the PR number from the link above, then run:
+          cd ~/ocp-hcp-gitops
+          ./scripts/seal-pr-secrets.sh <PR-NUMBER>
 
-          # 2. Go to the cluster directory
-          cd clusters/devhub/${{ parameters.clusterName }}/base
+          # The script will:
+          # ✅ Checkout the PR automatically
+          # ✅ Extract and seal both secrets
+          # ✅ Replace plain-text with sealed secrets
+          # ✅ Show you what changed
 
-          # 3. Seal the pull secret
-          oc create secret docker-registry ${{ parameters.clusterName }}-pull-secret \
-            --from-literal=.dockerconfigjson="$(cat pull-secret.yaml | grep '.dockerconfigjson:' | sed 's/.*: |//')" \
-            --namespace=clusters-${{ parameters.clusterName }} \
-            --dry-run=client -o yaml | \
-          kubeseal --controller-namespace=kube-system \
-            --controller-name=sealed-secrets-controller \
-            --format=yaml > pull-secret-sealed.yaml
-
-          # 4. Seal the SSH key
-          oc create secret generic ${{ parameters.clusterName }}-ssh-key \
-            --from-literal=id_rsa.pub="$(cat ssh-key.yaml | grep 'id_rsa.pub:' | sed 's/.*: |//')" \
-            --namespace=clusters-${{ parameters.clusterName }} \
-            --dry-run=client -o yaml | \
-          kubeseal --controller-namespace=kube-system \
-            --controller-name=sealed-secrets-controller \
-            --format=yaml > ssh-key-sealed.yaml
-
-          # 5. Replace the plain-text secrets with sealed ones
-          rm pull-secret.yaml ssh-key.yaml
-          mv pull-secret-sealed.yaml pull-secret.yaml
-          mv ssh-key-sealed.yaml ssh-key.yaml
-
-          # 6. Commit and push the sealed secrets
-          git add pull-secret.yaml ssh-key.yaml
-          git commit -m "Seal secrets with Kubeseal"
+          # Then commit and merge:
           git push
-
-          # 7. Now merge the PR
           gh pr merge --squash
+
+          # Apply ArgoCD application to start deployment:
+          oc apply -f clusters/devhub/${{ parameters.clusterName }}/argocd/application.yaml
           ```
 
-          **Why this is important:**
-          - Plain-text secrets in Git = security vulnerability
-          - Sealed secrets can only be decrypted by your cluster
-          - Safe to commit to public repositories
+          **Example for this PR:**
+          ```bash
+          cd ~/ocp-hcp-gitops
+          ./scripts/seal-pr-secrets.sh ${{ steps.publish.output.pullRequestNumber }}
+          git push
+          gh pr merge --squash
+          oc apply -f clusters/devhub/${{ parameters.clusterName }}/argocd/application.yaml
+          ```
+
+          **Why seal secrets?**
+          - ⚠️ Plain-text secrets in Git = security vulnerability
+          - ✅ Sealed secrets can only be decrypted by your cluster
+          - ✅ Safe to commit to public repositories
+          - ✅ The script handles all complexity automatically
 
           **Monitor progress:**
           ```bash
