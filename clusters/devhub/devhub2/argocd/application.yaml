@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
     targetRevision: HEAD
-    path: clusters/devhub2/base
+    path: clusters/devhub/devhub2/base
   destination:
     server: https://kubernetes.default.svc
     namespace: clusters-devhub2
