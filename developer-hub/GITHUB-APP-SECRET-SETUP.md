@@ -79,7 +79,11 @@ Before creating the GitHub App:
 
 4. **Sealed Secrets Controller** (for production):
    ```bash
-   oc get pods -n sealed-secrets-controller
+   # Check if Sealed Secrets is installed (may be in kube-system or sealed-secrets namespace)
+   oc get deployment -A | grep sealed-secrets-controller
+   
+   # Or check a specific namespace
+   oc get pods -n kube-system | grep sealed-secrets
    ```
 
 ---
@@ -277,10 +281,15 @@ For production, use Sealed Secrets to encrypt the secret before committing to Gi
    ```bash
    kubeseal --format=yaml \
      --controller-name=sealed-secrets-controller \
-     --controller-namespace=sealed-secrets-controller \
+     --controller-namespace=kube-system \
      < /tmp/github-app-secret.yaml \
      > developer-hub/github-app-sealed-secret.yaml
    ```
+   
+   > **Note:** The namespace is `kube-system` on this cluster. If your Sealed Secrets controller is in a different namespace, check with:
+   > ```bash
+   > oc get deployment -A | grep sealed-secrets-controller
+   > ```
 
 3. **Verify the sealed secret:**
    ```bash

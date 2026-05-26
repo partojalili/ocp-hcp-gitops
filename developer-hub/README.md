@@ -450,8 +450,12 @@ EOF
 # 3. Seal the secret
 kubeseal -f /tmp/github-secret.yaml \
          -w developer-hub/github-integration-sealed-secret.yaml \
-         --controller-namespace sealed-secrets \
+         --controller-namespace kube-system \
          --controller-name sealed-secrets-controller
+
+# Note: Controller is in kube-system namespace on this cluster
+# To find your controller namespace, run:
+# oc get deployment -A | grep sealed-secrets-controller
 
 # 4. Clean up
 rm /tmp/github-secret.yaml
