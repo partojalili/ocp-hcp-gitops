@@ -18,8 +18,6 @@ spec:
       required:
         - clusterName
         - baseDomain
-        - pullSecret
-        - sshPublicKey
       properties:
         clusterName:
           title: Cluster Name
@@ -35,24 +33,6 @@ spec:
           description: Base domain for the cluster (e.g., apps.cluster-abc.redhat.com)
           default: apps.cluster-q2pfv.dynamic2.redhatworkshops.io
           ui:help: 'The base domain for cluster DNS and routes'
-
-        pullSecret:
-          title: Pull Secret
-          type: string
-          description: Red Hat pull secret (JSON format from console.redhat.com)
-          ui:widget: textarea
-          ui:options:
-            rows: 5
-          ui:help: 'Paste your pull secret from https://console.redhat.com/openshift/install/pull-secret'
-
-        sshPublicKey:
-          title: SSH Public Key
-          type: string
-          description: SSH public key for node access (e.g., ssh-rsa AAAA...)
-          ui:widget: textarea
-          ui:options:
-            rows: 3
-          ui:help: 'Paste your SSH public key (contents of ~/.ssh/id_rsa.pub)'
 
     - title: Worker Node Configuration
       required:
@@ -115,8 +95,6 @@ spec:
         values:
           clusterName: ${{ parameters.clusterName }}
           baseDomain: ${{ parameters.baseDomain }}
-          pullSecret: ${{ parameters.pullSecret }}
-          sshPublicKey: ${{ parameters.sshPublicKey }}
           workerReplicas: ${{ parameters.workerReplicas }}
           cpuCores: ${{ parameters.cpuCores }}
           memoryGi: ${{ parameters.memoryGi }}
@@ -170,35 +148,14 @@ spec:
 
           **What happens next:**
           1. ✅ Pull request created with cluster configuration
-          2. ⚠️ **IMPORTANT: Manually seal secrets before merging** (see instructions below)
+          2. ✅ Sealed secrets automatically referenced from base repository
           3. ⏳ After merge, ArgoCD will detect the new configuration (~2-3 minutes)
           4. ⏳ HostedCluster and NodePool will be created
           5. ⏳ Control plane pods will deploy (~5 minutes)
           6. ⏳ Worker VMs will be created (~5 minutes)
           7. ✅ Cluster will be fully available (~15-20 minutes total)
 
-          **SECURITY NOTICE:** The PR contains unsealed secrets. Before merging, seal them using:
-          ```bash
-          # Checkout the PR branch
-          gh pr checkout <PR-NUMBER>
-
-          # Go to cluster folder
-          cd clusters/devhub/${{ parameters.clusterName }}
-
-          # Seal the secrets
-          ../../developer-hub/templates/hcp-cluster-template/seal-secrets.sh \
-            "${{ parameters.clusterName }}" \
-            "$(cat base/pull-secret.yaml | grep '.dockerconfigjson:' | awk '{print $2}')" \
-            "$(cat base/ssh-key.yaml | grep 'id_rsa.pub:' | awk '{print $2}')"
-
-          # Commit and push sealed secrets
-          git add base/pull-secret.yaml base/ssh-key.yaml
-          git commit -m "Seal secrets with Kubeseal"
-          git push
-
-          # Now merge the PR
-          gh pr merge --squash
-          ```
+          **Security:** This template uses pre-sealed secrets from the base repository. No plain-text secrets are committed to Git.
 
           **Monitor progress:**
           ```bash

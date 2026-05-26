@@ -12,13 +12,13 @@ spec:
   release:
     image: quay.io/openshift-release-dev/ocp-release:4.19.0-x86_64
 
-  # Pull secret reference
+  # Pull secret reference (from base sealed secret)
   pullSecret:
-    name: ${{ values.clusterName }}-pull-secret
+    name: hcp-pull-secret
 
-  # SSH key for node access (optional)
+  # SSH key for node access (from base sealed secret)
   sshKey:
-    name: ${{ values.clusterName }}-ssh-key
+    name: hcp-ssh-key
 
   # Networking configuration
   networking:
