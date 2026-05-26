@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devhub4-hosted-cluster
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+    targetRevision: HEAD
+    path: clusters/devhub/devhub4/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: clusters-devhub4
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
