@@ -18,6 +18,8 @@ spec:
       required:
         - clusterName
         - baseDomain
+        - pullSecret
+        - sshPublicKey
       properties:
         clusterName:
           title: Cluster Name
@@ -33,6 +35,24 @@ spec:
           description: Base domain for the cluster (e.g., apps.cluster-abc.redhat.com)
           default: apps.cluster-q2pfv.dynamic2.redhatworkshops.io
           ui:help: 'The base domain for cluster DNS and routes'
+
+        pullSecret:
+          title: Pull Secret
+          type: string
+          description: Red Hat pull secret (JSON format from console.redhat.com)
+          ui:widget: textarea
+          ui:options:
+            rows: 5
+          ui:help: 'Paste your pull secret from https://console.redhat.com/openshift/install/pull-secret'
+
+        sshPublicKey:
+          title: SSH Public Key
+          type: string
+          description: SSH public key for node access (e.g., ssh-rsa AAAA...)
+          ui:widget: textarea
+          ui:options:
+            rows: 3
+          ui:help: 'Paste your SSH public key (contents of ~/.ssh/id_rsa.pub)'
 
     - title: Worker Node Configuration
       required:
@@ -95,6 +115,8 @@ spec:
         values:
           clusterName: ${{ parameters.clusterName }}
           baseDomain: ${{ parameters.baseDomain }}
+          pullSecret: ${{ parameters.pullSecret }}
+          sshPublicKey: ${{ parameters.sshPublicKey }}
           workerReplicas: ${{ parameters.workerReplicas }}
           cpuCores: ${{ parameters.cpuCores }}
           memoryGi: ${{ parameters.memoryGi }}
@@ -148,14 +170,60 @@ spec:
 
           **What happens next:**
           1. ✅ Pull request created with cluster configuration
-          2. ✅ Sealed secrets automatically referenced from base repository
+          2. ⚠️ **REQUIRED: Seal the secrets before merging** (see instructions below)
           3. ⏳ After merge, ArgoCD will detect the new configuration (~2-3 minutes)
           4. ⏳ HostedCluster and NodePool will be created
           5. ⏳ Control plane pods will deploy (~5 minutes)
           6. ⏳ Worker VMs will be created (~5 minutes)
           7. ✅ Cluster will be fully available (~15-20 minutes total)
 
-          **Security:** This template uses pre-sealed secrets from the base repository. No plain-text secrets are committed to Git.
+          **CRITICAL: Seal Secrets Before Merging**
+
+          The PR currently contains plain-text secrets. You MUST seal them before merging:
+
+          ```bash
+          # 1. Get the PR number from the link above, then checkout
+          gh pr checkout <PR-NUMBER>
+
+          # 2. Go to the cluster directory
+          cd clusters/devhub/${{ parameters.clusterName }}/base
+
+          # 3. Seal the pull secret
+          oc create secret docker-registry ${{ parameters.clusterName }}-pull-secret \
+            --from-literal=.dockerconfigjson="$(cat pull-secret.yaml | grep '.dockerconfigjson:' | sed 's/.*: |//')" \
+            --namespace=clusters-${{ parameters.clusterName }} \
+            --dry-run=client -o yaml | \
+          kubeseal --controller-namespace=kube-system \
+            --controller-name=sealed-secrets-controller \
+            --format=yaml > pull-secret-sealed.yaml
+
+          # 4. Seal the SSH key
+          oc create secret generic ${{ parameters.clusterName }}-ssh-key \
+            --from-literal=id_rsa.pub="$(cat ssh-key.yaml | grep 'id_rsa.pub:' | sed 's/.*: |//')" \
+            --namespace=clusters-${{ parameters.clusterName }} \
+            --dry-run=client -o yaml | \
+          kubeseal --controller-namespace=kube-system \
+            --controller-name=sealed-secrets-controller \
+            --format=yaml > ssh-key-sealed.yaml
+
+          # 5. Replace the plain-text secrets with sealed ones
+          rm pull-secret.yaml ssh-key.yaml
+          mv pull-secret-sealed.yaml pull-secret.yaml
+          mv ssh-key-sealed.yaml ssh-key.yaml
+
+          # 6. Commit and push the sealed secrets
+          git add pull-secret.yaml ssh-key.yaml
+          git commit -m "Seal secrets with Kubeseal"
+          git push
+
+          # 7. Now merge the PR
+          gh pr merge --squash
+          ```
+
+          **Why this is important:**
+          - Plain-text secrets in Git = security vulnerability
+          - Sealed secrets can only be decrypted by your cluster
+          - Safe to commit to public repositories
 
           **Monitor progress:**
           ```bash

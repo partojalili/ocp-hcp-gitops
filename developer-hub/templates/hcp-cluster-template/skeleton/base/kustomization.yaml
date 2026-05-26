@@ -5,5 +5,7 @@ namespace: clusters-${{ values.clusterName }}
 
 resources:
   - namespace.yaml
+  - pull-secret.yaml
+  - ssh-key.yaml
   - hostedcluster.yaml
   - nodepool.yaml
