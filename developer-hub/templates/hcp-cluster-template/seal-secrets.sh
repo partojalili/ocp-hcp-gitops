@@ -40,7 +40,7 @@ kubectl create secret docker-registry "${CLUSTER_NAME}-pull-secret" \
   --from-literal=.dockerconfigjson="${PULL_SECRET}" \
   --namespace="${NAMESPACE}" \
   --dry-run=client -o yaml | \
-kubeseal --controller-namespace=sealed-secrets \
+kubeseal --controller-namespace=kube-system \
   --controller-name=sealed-secrets-controller \
   --format=yaml > "base/pull-secret.yaml"
 
@@ -52,7 +52,7 @@ kubectl create secret generic "${CLUSTER_NAME}-ssh-key" \
   --from-literal=id_rsa.pub="${SSH_PUBLIC_KEY}" \
   --namespace="${NAMESPACE}" \
   --dry-run=client -o yaml | \
-kubeseal --controller-namespace=sealed-secrets \
+kubeseal --controller-namespace=kube-system \
   --controller-name=sealed-secrets-controller \
   --format=yaml > "base/ssh-key.yaml"
 

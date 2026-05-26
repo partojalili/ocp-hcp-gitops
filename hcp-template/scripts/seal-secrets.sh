@@ -79,7 +79,10 @@ oc create secret docker-registry CLUSTER_NAME-pull-secret \
   --dry-run=client -o yaml > pull-secret-temp.yaml
 
 echo "Sealing secret..."
-kubeseal --format=yaml < pull-secret-temp.yaml > base/pull-secret-sealed.yaml
+kubeseal --format=yaml \
+  --controller-namespace=kube-system \
+  --controller-name=sealed-secrets-controller \
+  < pull-secret-temp.yaml > base/pull-secret-sealed.yaml
 
 rm pull-secret-temp.yaml
 
@@ -112,7 +115,10 @@ if [ -n "$SSH_KEY" ]; then
       --dry-run=client -o yaml > ssh-key-temp.yaml
 
     echo "Sealing secret..."
-    kubeseal --format=yaml < ssh-key-temp.yaml > base/ssh-key-sealed.yaml
+    kubeseal --format=yaml \
+      --controller-namespace=kube-system \
+      --controller-name=sealed-secrets-controller \
+      < ssh-key-temp.yaml > base/ssh-key-sealed.yaml
 
     rm ssh-key-temp.yaml
 
