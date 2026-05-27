@@ -58,6 +58,19 @@ This is the **production overlay** that contains your real cluster domain.
 - **OCP Version**: 4.19
 - **Management**: ACM + OpenShift GitOps (ArgoCD)
 
+### Hub Cluster Infrastructure
+
+The hub cluster worker nodes provide the compute capacity for hosted control planes and KubeVirt VMs:
+
+| Worker Node | CPU Cores | Memory |
+|-------------|-----------|--------|
+| worker-cluster-r8knr-1 | 32 | 94 GB |
+| worker-cluster-r8knr-2 | 24 | 94 GB |
+| worker-cluster-r8knr-3 | 24 | 94 GB |
+| **Total** | **80 cores** | **~282 GB** |
+
+**Note:** Each hosted cluster's control plane pods and worker VMs consume resources from this shared pool.
+
 ## How It Works - GitOps Flow
 
 This repository implements a complete GitOps workflow where changes flow from Git to production automatically:
