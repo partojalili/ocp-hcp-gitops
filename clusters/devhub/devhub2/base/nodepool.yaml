@@ -11,7 +11,7 @@ spec:
   clusterName: devhub2
 
   # Number of worker nodes
-  replicas: 1
+  replicas: 2
 
   # OCP 4.19 release image (must match HostedCluster)
   release:
