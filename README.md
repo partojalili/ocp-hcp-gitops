@@ -1,5 +1,11 @@
 # OpenShift Hosted Control Plane - GitOps Deployment
 
+The hub needs to have this much resources:
+Hub worker nodes: 
+  - worker-cluster-r8knr-1: 32 CPU, 94 GB memory
+  - worker-cluster-r8knr-2: 24 CPU, 94 GB memory
+  - worker-cluster-r8knr-3: 24 CPU, 94 GB memory
+
 This repository contains GitOps manifests for deploying an OpenShift 4.19 Hosted Control Plane cluster using ACM (Advanced Cluster Management) and OpenShift Virtualization (KubeVirt).
 
 ## ⚠️ IMPORTANT: Update Base Domain
