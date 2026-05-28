@@ -248,7 +248,36 @@ ocp-hcp-gitops/
 
 **Prerequisites**: Ensure you have completed the [Initial Setup](#initial-setup-gitops-operator--acm-integration) above.
 
-### 1. Install Sealed Secrets Controller
+### Secret Management Options
+
+This repository supports two approaches for managing secrets:
+
+#### ✅ **Recommended: External Secrets Operator (Automated)**
+
+**Modern, fully automated workflow** - no manual steps required!
+
+- **Zero manual intervention** - secrets automatically synced
+- **Central management** - update once, sync everywhere
+- **Production-ready** - easily upgrade to HashiCorp Vault
+- **GitOps-friendly** - ExternalSecret resources safe to commit
+
+**Installation:** See [external-secrets/INSTALLATION.md](external-secrets/INSTALLATION.md)
+
+**How it works:** See [developer-hub/EXTERNAL-SECRETS-SETUP.md](developer-hub/EXTERNAL-SECRETS-SETUP.md)
+
+#### ⚠️ **Legacy: Sealed Secrets (Manual)**
+
+**Traditional approach** - requires manual sealing step before each PR merge.
+
+- Manual `seal-pr-secrets.sh` script required
+- Secrets must be sealed before committing
+- Used by existing devhub1 and devhub2 clusters
+
+**Note:** Existing clusters using Sealed Secrets continue to work. New clusters should use External Secrets Operator.
+
+---
+
+### 1. Install Sealed Secrets Controller (Legacy)
 
 ```bash
 # Install on your ACM hub cluster
@@ -258,7 +287,7 @@ oc apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.
 brew install kubeseal  # macOS
 ```
 
-### 2. Seal Your Secrets
+### 2. Seal Your Secrets (Legacy - Skip if using External Secrets)
 
 **IMPORTANT:** The `pull-secret.txt` file must be placed in the **repository root** directory.
 
