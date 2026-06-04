@@ -97,6 +97,7 @@ spec:
           Created via Red Hat Developer Hub
         targetPath: .
         sourcePath: .
+        update: true
 
     - id: register
       name: Register Component
