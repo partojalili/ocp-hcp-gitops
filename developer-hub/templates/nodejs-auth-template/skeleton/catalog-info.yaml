@@ -18,9 +18,8 @@ metadata:
       icon: github
 spec:
   type: service
-  lifecycle: production
+  lifecycle: experimental
   owner: ${{ values.owner }}
-  system: authentication
   providesApis:
     - ${{ values.name }}-api
 
@@ -35,7 +34,7 @@ metadata:
     - jwt
 spec:
   type: openapi
-  lifecycle: production
+  lifecycle: experimental
   owner: ${{ values.owner }}
   definition: |
     openapi: 3.0.0
