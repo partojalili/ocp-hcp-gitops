@@ -58,18 +58,13 @@ spec:
           ui:help: 'Name of the MongoDB database'
 
     - title: Git Repository
-      required:
-        - repoUrl
       properties:
         repoUrl:
           title: Repository Location
           type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-            allowedOwners:
-              - partojalili
+          description: GitHub repository (will create a PR in this repo)
+          default: github.com?owner=partojalili&repo=nodejs
+          ui:help: 'Format: github.com?owner=partojalili&repo=REPO_NAME'
 
   steps:
     - id: fetch-base
