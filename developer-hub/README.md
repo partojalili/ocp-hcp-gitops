@@ -385,6 +385,7 @@ oc delete namespace rhdh-operator
 ### Documentation in This Repository
 - **[GITHUB-APP-SECRET-SETUP.md](./GITHUB-APP-SECRET-SETUP.md)** - Detailed GitHub App setup with troubleshooting
 - **[GITHUB-GITOPS-INTEGRATION.md](./GITHUB-GITOPS-INTEGRATION.md)** - GitOps workflow and ArgoCD integration
+- **[DEVSPACES-SETUP.md](./DEVSPACES-SETUP.md)** - Red Hat OpenShift Dev Spaces installation and integration with templates
 
 ### Official Documentation
 - [Red Hat Developer Hub Documentation](https://access.redhat.com/documentation/en-us/red_hat_developer_hub)
@@ -549,6 +550,113 @@ developer-hub/templates/hcp-cluster-template/
 ```
 
 To modify the template form or default values, edit `template.yaml`.
+
+---
+
+## Cloud-Based Development with Red Hat OpenShift Dev Spaces
+
+Red Hat OpenShift Dev Spaces provides browser-based development environments that integrate seamlessly with Developer Hub templates.
+
+### What is Dev Spaces?
+
+Dev Spaces delivers VS Code in your browser with pre-configured development containers. When you scaffold an application through Developer Hub, you can click "Open in Dev Spaces" to instantly start coding—no local setup required.
+
+**Key Features:**
+- ✅ One-click launch from Developer Hub catalog
+- ✅ Pre-configured containers with all dependencies
+- ✅ Integrated databases and services
+- ✅ Consistent environments across teams
+- ✅ Works from any device with a browser
+
+### Quick Setup
+
+To install Dev Spaces and integrate it with your Developer Hub templates:
+
+```bash
+# Install Dev Spaces operator
+oc apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-devspaces
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: devspaces-operator-group
+  namespace: openshift-devspaces
+spec: {}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: devspaces
+  namespace: openshift-devspaces
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: devspaces
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+
+# Wait for operator (~2 minutes)
+oc get csv -n openshift-devspaces -w
+
+# Create Dev Spaces instance
+oc apply -f - <<EOF
+apiVersion: org.eclipse.che/v2
+kind: CheCluster
+metadata:
+  name: devspaces
+  namespace: openshift-devspaces
+spec:
+  components:
+    cheServer:
+      debug: false
+      logLevel: INFO
+  devEnvironments:
+    defaultEditor: che-incubator/che-code/latest
+    storage:
+      pvcStrategy: per-user
+EOF
+
+# Get Dev Spaces URL
+oc get checluster devspaces -n openshift-devspaces -o jsonpath='{.status.cheURL}'
+```
+
+### Integration with Templates
+
+To enable Dev Spaces for your templates:
+
+1. **Add `devfile.yaml`** to your template's skeleton directory - defines the development container
+2. **Add "Open in Dev Spaces" link** to `catalog-info.yaml` - provides one-click access
+
+**Example devfile.yaml for Node.js:**
+```yaml
+schemaVersion: 2.2.0
+metadata:
+  name: my-app
+components:
+  - name: nodejs
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
+      memoryLimit: 1Gi
+      endpoints:
+        - name: nodejs
+          targetPort: 3000
+commands:
+  - id: install
+    exec:
+      component: nodejs
+      commandLine: npm install
+  - id: run
+    exec:
+      component: nodejs
+      commandLine: npm run dev
+```
+
+**For complete Dev Spaces installation, configuration, and template integration:** See **[DEVSPACES-SETUP.md](./DEVSPACES-SETUP.md)**
 
 ---
 
