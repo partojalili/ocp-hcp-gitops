@@ -1,0 +1,164 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: nodejs-auth-template
+  title: Node.js JWT Authentication App
+  description: Create a new Node.js application with JWT authentication, MongoDB, and Keycloak integration
+  tags:
+    - nodejs
+    - express
+    - jwt
+    - mongodb
+    - authentication
+    - recommended
+spec:
+  owner: platform-engineering
+  type: service
+
+  parameters:
+    - title: Application Information
+      required:
+        - name
+        - description
+      properties:
+        name:
+          title: Application Name
+          type: string
+          description: Name of your application (lowercase, alphanumeric, and hyphens)
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+          ui:help: 'Example: my-auth-api, user-service'
+
+        description:
+          title: Description
+          type: string
+          description: Brief description of your application
+          default: Node.js API with JWT authentication
+
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+
+    - title: MongoDB Configuration
+      required:
+        - mongodbEnabled
+      properties:
+        mongodbEnabled:
+          title: Enable MongoDB
+          type: boolean
+          description: Include MongoDB configuration and models
+          default: true
+
+        databaseName:
+          title: Database Name
+          type: string
+          description: MongoDB database name
+          default: myapp
+          ui:help: 'Name of the MongoDB database'
+
+    - title: Git Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - partojalili
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          mongodbEnabled: ${{ parameters.mongodbEnabled }}
+          databaseName: ${{ parameters.databaseName }}
+          repoUrl: ${{ parameters.repoUrl }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        branchName: add-${{ parameters.name }}-scaffolding
+        title: "Scaffold ${{ parameters.name }} application"
+        description: |
+          ## New Application Scaffolded
+
+          - **Name**: ${{ parameters.name }}
+          - **Description**: ${{ parameters.description }}
+          - **MongoDB**: ${{ parameters.mongodbEnabled }}
+
+          Created via Red Hat Developer Hub
+        targetPath: .
+        sourcePath: .
+
+    - id: register
+      name: Register Component
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
+    text:
+      - title: Application Scaffolded Successfully
+        content: |
+          Your Node.js application **${{ parameters.name }}** has been scaffolded!
+
+          **What's included:**
+          - ✅ Express.js REST API
+          - ✅ JWT Authentication
+          - ✅ MongoDB Integration (optional)
+          - ✅ Keycloak Support
+          - ✅ Docker Configuration
+          - ✅ Environment Configuration
+
+          **Next steps:**
+          1. Review and merge the PR
+          2. Clone the repository
+          3. Configure environment variables in `.env`
+          4. Run `npm install`
+          5. Start MongoDB: `docker-compose up -d mongodb`
+          6. Run the app: `npm run dev`
+
+          **Environment Setup:**
+          ```bash
+          # Clone your new repo
+          git clone ${{ steps.publish.output.remoteUrl | replace('/pull/', '/') | replace(/\/\d+$/, '') }}
+          cd ${{ parameters.name }}
+
+          # Install dependencies
+          npm install
+
+          # Create .env file
+          cp env .env
+
+          # Edit .env with your configuration
+          nano .env
+
+          # Start the app
+          npm run dev
+          ```
+
+          Your API will be available at `http://localhost:9091`

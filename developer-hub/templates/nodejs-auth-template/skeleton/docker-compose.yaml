@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: ${{ values.name }}-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${{ values.databaseName }}
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: ${{ values.name }}-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DB: ${{ values.databaseName }}
+      HOSTDB: mongodb
+      DBPORT: 27017
+      PORT: 9091
+    ports:
+      - "9091:9091"
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  app-network:
+    driver: bridge

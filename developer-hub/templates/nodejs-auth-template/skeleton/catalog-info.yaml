@@ -1,0 +1,45 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.name }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: partojalili/${{ values.name }}
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - nodejs
+    - express
+    - jwt
+    - authentication
+    - mongodb
+  links:
+    - url: https://github.com/${{ values.repoUrl | projectSlug }}
+      title: GitHub Repository
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: ${{ values.owner }}
+  system: authentication
+  providesApis:
+    - ${{ values.name }}-api
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ${{ values.name }}-api
+  description: REST API for ${{ values.name }}
+  tags:
+    - rest
+    - jwt
+spec:
+  type: openapi
+  lifecycle: production
+  owner: ${{ values.owner }}
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: ${{ values.name }} API
+      version: 1.0.0
+      description: ${{ values.description }}
