@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.clusterName }}
+  description: OpenShift HCP Cluster - ${{ values.clusterName }}
+  annotations:
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - openshift
+    - hcp
+    - hosted-control-plane
+    - kubernetes
+    - cluster
+  links:
+    - url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/clusters/devhub/${{ values.clusterName }}
+      title: Cluster Configuration
+      icon: github
+    - url: https://console-openshift-console.${{ values.baseDomain }}
+      title: OpenShift Console
+      icon: dashboard
+    - url: https://openshift-gitops-server-openshift-gitops.${{ values.baseDomain }}/applications/${{ values.clusterName }}-hosted-cluster
+      title: ArgoCD Application
+      icon: sync
+spec:
+  type: cluster
+  lifecycle: production
+  owner: user:default/guest
