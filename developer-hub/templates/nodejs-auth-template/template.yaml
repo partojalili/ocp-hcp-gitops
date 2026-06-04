@@ -58,13 +58,18 @@ spec:
           ui:help: 'Name of the MongoDB database'
 
     - title: Git Repository
+      required:
+        - repoUrl
       properties:
         repoUrl:
           title: Repository Location
           type: string
-          description: GitHub repository (will create a PR in this repo)
-          default: github.com?owner=partojalili&repo=ocp-hcp-gitops
-          ui:help: 'The scaffolded app will be added to this repository via PR'
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - partojalili
 
   steps:
     - id: fetch-base
@@ -82,27 +87,27 @@ spec:
 
     - id: publish
       name: Publish to GitHub
-      action: publish:github:pull-request
+      action: publish:github
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        branchName: add-${{ parameters.name }}-scaffolding
-        title: "Scaffold ${{ parameters.name }} application"
-        description: |
-          ## New Application Scaffolded
+        description: ${{ parameters.description }}
+        repoVisibility: public
+        defaultBranch: main
 
-          - **Name**: ${{ parameters.name }}
-          - **Description**: ${{ parameters.description }}
-          - **MongoDB**: ${{ parameters.mongodbEnabled }}
-
-          Created via Red Hat Developer Hub
-        targetPath: .
-        sourcePath: .
-        update: true
+    - id: register
+      name: Register Component
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
 
   output:
     links:
-      - title: View Pull Request
+      - title: View Repository
         url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
     text:
       - title: Application Scaffolded Successfully
         content: |
@@ -115,33 +120,17 @@ spec:
           - ✅ Keycloak Support
           - ✅ Docker Configuration
           - ✅ Environment Configuration
+          - ✅ Devfile for OpenShift Dev Spaces
+
+          **Repository created:** ${{ steps.publish.output.remoteUrl }}
+
+          **Component registered:** The component is now available in the catalog!
 
           **Next steps:**
-          1. Review and merge the PR (above)
-          2. After merge, the component will be registered in the Backstage catalog
-          3. Clone the repository
-          4. Configure environment variables in `.env`
-          5. Run `npm install`
-          6. Start MongoDB: `docker-compose up -d mongodb`
-          7. Run the app: `npm run dev`
-
-          **Environment Setup:**
-          ```bash
-          # Clone your new repo
-          git clone ${{ steps.publish.output.remoteUrl | replace('/pull/', '/') | replace(/\/\d+$/, '') }}
-          cd ${{ parameters.name }}
-
-          # Install dependencies
-          npm install
-
-          # Create .env file
-          cp env .env
-
-          # Edit .env with your configuration
-          nano .env
-
-          # Start the app
-          npm run dev
-          ```
+          1. Clone the repository: `git clone ${{ steps.publish.output.remoteUrl }}.git`
+          2. Configure environment variables in `.env`
+          3. Run `npm install`
+          4. Start the app: `npm run dev`
+          5. Or click "Open in Dev Spaces" from the catalog to start coding immediately!
 
           Your API will be available at `http://localhost:9091`
