@@ -12,7 +12,7 @@ metadata:
     - authentication
     - recommended
 spec:
-  owner: platform-engineering
+  owner: user:default/guest
   type: service
 
   parameters:
@@ -39,10 +39,7 @@ spec:
           title: Owner
           type: string
           description: Owner of the component
-          ui:field: OwnerPicker
-          ui:options:
-            catalogFilter:
-              kind: [Group, User]
+          default: user:default/guest
 
     - title: MongoDB Configuration
       required:
