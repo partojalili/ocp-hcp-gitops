@@ -25,3 +25,4 @@ metadata:
 spec:
   type: cluster
   lifecycle: production
+  owner: user:default/guest

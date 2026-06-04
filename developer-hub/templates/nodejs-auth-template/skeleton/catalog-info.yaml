@@ -22,6 +22,7 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
+  owner: user:default/guest
   providesApis:
     - ${{ values.name }}-api
 
@@ -37,6 +38,7 @@ metadata:
 spec:
   type: openapi
   lifecycle: experimental
+  owner: user:default/guest
   definition: |
     openapi: 3.0.0
     info:

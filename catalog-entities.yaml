@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: guest
+  description: Default guest user for Developer Hub
+spec:
+  profile:
+    displayName: Guest User
+    email: guest@example.com
+  memberOf: []
