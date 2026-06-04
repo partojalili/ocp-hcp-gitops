@@ -35,7 +35,7 @@ components:
 
   - name: mongodb
     container:
-      image: registry.redhat.io/rhel8/mongodb-42:latest
+      image: docker.io/mongo:4.4
       memoryLimit: 512Mi
       memoryRequest: 256Mi
       mountSources: false
@@ -44,14 +44,12 @@ components:
           targetPort: 27017
           exposure: internal
       env:
-        - name: MONGODB_USER
-          value: user
-        - name: MONGODB_PASSWORD
-          value: password
-        - name: MONGODB_DATABASE
-          value: ${{ values.databaseName }}
-        - name: MONGODB_ADMIN_PASSWORD
+        - name: MONGO_INITDB_ROOT_USERNAME
           value: admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: admin
+        - name: MONGO_INITDB_DATABASE
+          value: ${{ values.databaseName }}
 
 commands:
   - id: install-dependencies
