@@ -99,19 +99,10 @@ spec:
         sourcePath: .
         update: true
 
-    - id: register
-      name: Register Component
-      action: catalog:register
-      input:
-        catalogInfoUrl: ${{ steps.publish.output.repoContentsUrl }}/catalog-info.yaml
-
   output:
     links:
       - title: View Pull Request
         url: ${{ steps.publish.output.remoteUrl }}
-      - title: Open in Catalog
-        icon: catalog
-        entityRef: ${{ steps.register.output.entityRef }}
     text:
       - title: Application Scaffolded Successfully
         content: |
@@ -126,12 +117,13 @@ spec:
           - ✅ Environment Configuration
 
           **Next steps:**
-          1. Review and merge the PR
-          2. Clone the repository
-          3. Configure environment variables in `.env`
-          4. Run `npm install`
-          5. Start MongoDB: `docker-compose up -d mongodb`
-          6. Run the app: `npm run dev`
+          1. Review and merge the PR (above)
+          2. After merge, the component will be registered in the Backstage catalog
+          3. Clone the repository
+          4. Configure environment variables in `.env`
+          5. Run `npm install`
+          6. Start MongoDB: `docker-compose up -d mongodb`
+          7. Run the app: `npm run dev`
 
           **Environment Setup:**
           ```bash
