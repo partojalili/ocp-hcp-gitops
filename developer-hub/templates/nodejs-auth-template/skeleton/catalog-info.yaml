@@ -22,7 +22,6 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: ${{ values.owner }}
   providesApis:
     - ${{ values.name }}-api
 
@@ -38,7 +37,6 @@ metadata:
 spec:
   type: openapi
   lifecycle: experimental
-  owner: ${{ values.owner }}
   definition: |
     openapi: 3.0.0
     info:
