@@ -63,8 +63,8 @@ spec:
           title: Repository Location
           type: string
           description: GitHub repository (will create a PR in this repo)
-          default: github.com?owner=partojalili&repo=nodejs
-          ui:help: 'Format: github.com?owner=partojalili&repo=REPO_NAME'
+          default: github.com?owner=partojalili&repo=ocp-hcp-gitops
+          ui:help: 'The scaffolded app will be added to this repository via PR'
 
   steps:
     - id: fetch-base
