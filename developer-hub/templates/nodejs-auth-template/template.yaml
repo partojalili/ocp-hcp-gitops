@@ -12,7 +12,6 @@ metadata:
     - authentication
     - recommended
 spec:
-  owner: user:default/guest
   type: service
 
   parameters:
