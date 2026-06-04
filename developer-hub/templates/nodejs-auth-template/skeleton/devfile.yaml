@@ -32,24 +32,8 @@ components:
           value: development
         - name: PORT
           value: "9091"
-
-  - name: mongodb
-    container:
-      image: docker.io/mongo:4.4
-      memoryLimit: 512Mi
-      memoryRequest: 256Mi
-      mountSources: false
-      endpoints:
-        - name: mongodb
-          targetPort: 27017
-          exposure: internal
-      env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          value: admin
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          value: admin
-        - name: MONGO_INITDB_DATABASE
-          value: ${{ values.databaseName }}
+        - name: MONGODB_URI
+          value: "mongodb://admin:admin@mongodb:27017/${{ values.databaseName }}?authSource=admin"
 
 commands:
   - id: install-dependencies
