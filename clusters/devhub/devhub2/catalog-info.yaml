@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: devhub2
+  description: OpenShift HCP Cluster - devhub2
+  annotations:
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - openshift
+    - hcp
+    - hosted-control-plane
+    - kubernetes
+    - cluster
+  links:
+    - url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/clusters/devhub/devhub2
+      title: Cluster Configuration
+      icon: github
+    - url: https://console-openshift-console.apps.cluster-r8knr.dynamic2.redhatworkshops.io
+      title: OpenShift Console
+      icon: dashboard
+    - url: https://openshift-gitops-server-openshift-gitops.apps.cluster-r8knr.dynamic2.redhatworkshops.io/applications/devhub2-hosted-cluster
+      title: ArgoCD Application
+      icon: sync
+spec:
+  type: cluster
+  lifecycle: production
+  owner: user:default/guest
