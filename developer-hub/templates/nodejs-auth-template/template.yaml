@@ -58,18 +58,13 @@ spec:
           ui:help: 'Name of the MongoDB database'
 
     - title: Git Repository
-      required:
-        - repoUrl
       properties:
         repoUrl:
           title: Repository Location
           type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-            allowedOwners:
-              - partojalili
+          description: GitHub repository (will create a PR in this repo)
+          default: github.com?owner=partojalili&repo=ocp-hcp-gitops
+          ui:help: 'The scaffolded app will be added to this repository via PR'
 
   steps:
     - id: fetch-base
@@ -90,7 +85,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        branchName: add-${{ parameters.name }}-scaffolding
+        branchName: add-${{ parameters.name }}-app
         title: "Add ${{ parameters.name }} application"
         description: |
           ## New Node.js Application
@@ -102,7 +97,7 @@ spec:
           Created via Red Hat Developer Hub scaffolder template.
 
           **After merging this PR**, the component will automatically appear in the Developer Hub catalog.
-        targetPath: .
+        targetPath: apps/${{ parameters.name }}
         sourcePath: .
 
   output:
