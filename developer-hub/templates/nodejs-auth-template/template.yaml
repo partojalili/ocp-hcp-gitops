@@ -85,26 +85,32 @@ spec:
           databaseName: ${{ parameters.databaseName }}
           repoUrl: ${{ parameters.repoUrl }}
 
-    - id: publish
-      name: Publish to GitHub
-      action: publish:github
+    - id: create-repo
+      name: Create GitHub Repository
+      action: github:repo:create
       input:
         repoUrl: ${{ parameters.repoUrl }}
         description: ${{ parameters.description }}
         repoVisibility: public
+
+    - id: publish
+      name: Push Code to Repository
+      action: github:repo:push
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: main
 
     - id: register
       name: Register Component
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        repoContentsUrl: ${{ steps['create-repo'].output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
 
   output:
     links:
       - title: View Repository
-        url: ${{ steps.publish.output.remoteUrl }}
+        url: ${{ steps['create-repo'].output.remoteUrl }}
       - title: Open in Catalog
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
@@ -122,12 +128,12 @@ spec:
           - ✅ Environment Configuration
           - ✅ Devfile for OpenShift Dev Spaces
 
-          **Repository created:** ${{ steps.publish.output.remoteUrl }}
+          **Repository created:** ${{ steps['create-repo'].output.remoteUrl }}
 
           **Component registered:** The component is now available in the catalog!
 
           **Next steps:**
-          1. Clone the repository: `git clone ${{ steps.publish.output.remoteUrl }}.git`
+          1. Clone the repository: `git clone ${{ steps['create-repo'].output.remoteUrl }}.git`
           2. Configure environment variables in `.env`
           3. Run `npm install`
           4. Start the app: `npm run dev`
