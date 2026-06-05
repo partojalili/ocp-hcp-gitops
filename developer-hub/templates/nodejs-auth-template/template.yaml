@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: nodejs-auth-template
   title: Node.js JWT Authentication App
-  description: Create a new Node.js application with JWT authentication, MongoDB, and Keycloak integration
+  description: Create a new Node.js application with JWT authentication, MongoDB, and Keycloak integration. Apps are scaffolded to the ocp-hcp-gitops repository under /apps/ directory and automatically discovered by the catalog.
   tags:
     - nodejs
     - express
