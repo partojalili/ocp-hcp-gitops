@@ -1,0 +1,47 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nodejs
+  description: Node.js API with JWT authentication
+  annotations:
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - nodejs
+    - express
+    - jwt
+    - authentication
+    - mongodb
+  links:
+    - url: ://github.com/partojalili/ocp-hcp-gitops
+      title: GitHub Repository
+      icon: github
+    - url: https://devspaces.apps.cluster-r8knr.dynamic2.redhatworkshops.io/#://github.com/partojalili/ocp-hcp-gitops
+      title: Open in Dev Spaces
+      icon: catalog
+spec:
+  type: service
+  lifecycle: experimental
+  owner: user:default/guest
+  providesApis:
+    - nodejs-api
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: nodejs-api
+  description: REST API for nodejs
+  tags:
+    - rest
+    - jwt
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: user:default/guest
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: nodejs API
+      version: 1.0.0
+      description: Node.js API with JWT authentication
