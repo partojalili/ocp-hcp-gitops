@@ -2,6 +2,14 @@
 
 ${{ values.description }}
 
+> **Note:** This application is scaffolded into the **ocp-hcp-gitops** repository under `/apps/${{ values.name }}/`. It is automatically discovered by Red Hat Developer Hub and appears in the catalog within 5 minutes of merging the PR.
+
+## Repository Structure
+
+This application lives in: `ocp-hcp-gitops/apps/${{ values.name }}/`
+
+All applications created from this template are organized in the `/apps/` directory of the ocp-hcp-gitops repository for centralized management and automatic catalog discovery.
+
 ## Features
 
 - ✅ Express.js REST API
