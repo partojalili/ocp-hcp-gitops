@@ -85,35 +85,30 @@ spec:
           databaseName: ${{ parameters.databaseName }}
           repoUrl: ${{ parameters.repoUrl }}
 
-    - id: create-repo
-      name: Create GitHub Repository
-      action: github:repo:create
-      input:
-        repoUrl: ${{ parameters.repoUrl }}
-        description: ${{ parameters.description }}
-        repoVisibility: public
-
     - id: publish
-      name: Push Code to Repository
-      action: github:repo:push
+      name: Create Pull Request
+      action: publish:github:pull-request
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
+        branchName: add-${{ parameters.name }}-scaffolding
+        title: "Add ${{ parameters.name }} application"
+        description: |
+          ## New Node.js Application
 
-    - id: register
-      name: Register Component
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps['create-repo'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+          - **Name**: ${{ parameters.name }}
+          - **Description**: ${{ parameters.description }}
+          - **MongoDB**: ${{ parameters.mongodbEnabled }}
+
+          Created via Red Hat Developer Hub scaffolder template.
+
+          **After merging this PR**, the component will automatically appear in the Developer Hub catalog.
+        targetPath: .
+        sourcePath: .
 
   output:
     links:
-      - title: View Repository
-        url: ${{ steps['create-repo'].output.remoteUrl }}
-      - title: Open in Catalog
-        icon: catalog
-        entityRef: ${{ steps.register.output.entityRef }}
+      - title: View Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
     text:
       - title: Application Scaffolded Successfully
         content: |
@@ -128,15 +123,10 @@ spec:
           - ✅ Environment Configuration
           - ✅ Devfile for OpenShift Dev Spaces
 
-          **Repository created:** ${{ steps['create-repo'].output.remoteUrl }}
-
-          **Component registered:** The component is now available in the catalog!
-
           **Next steps:**
-          1. Clone the repository: `git clone ${{ steps['create-repo'].output.remoteUrl }}.git`
-          2. Configure environment variables in `.env`
-          3. Run `npm install`
-          4. Start the app: `npm run dev`
-          5. Or click "Open in Dev Spaces" from the catalog to start coding immediately!
+          1. **Review and merge the pull request** (link above)
+          2. After merging, the component will automatically appear in the Developer Hub catalog
+          3. Clone the repository and start developing
+          4. Or click "Open in Dev Spaces" from the catalog to start coding immediately!
 
           Your API will be available at `http://localhost:9091`
