@@ -16,10 +16,10 @@ components:
   - name: nodejs
     container:
       image: registry.redhat.io/devspaces/udi-rhel8:latest
-      memoryLimit: 768Mi
-      memoryRequest: 256Mi
-      cpuLimit: 500m
-      cpuRequest: 100m
+      memoryLimit: 512Mi
+      memoryRequest: 128Mi
+      cpuLimit: 250m
+      cpuRequest: 50m
       mountSources: true
       sourceMapping: /projects
       endpoints:
