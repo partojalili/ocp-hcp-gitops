@@ -30,7 +30,7 @@ spec:
     sshPrivateKeySecretRef:
       name: gcp-cluster-ssh-private-key
     imageSetRef:
-      name: openshift-v4.21.19
+      name: img4.20.24-x86-64-appsub
 
   # Pull secret
   pullSecretRef:
