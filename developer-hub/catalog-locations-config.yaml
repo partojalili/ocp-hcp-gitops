@@ -28,3 +28,9 @@ data:
           target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/hcp-cluster-template/template.yaml
           rules:
             - allow: [Template]
+
+        # OpenShift GCP Cluster Template
+        - type: url
+          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/gcp-openshift-template/template.yaml
+          rules:
+            - allow: [Template]
