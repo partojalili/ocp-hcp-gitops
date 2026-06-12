@@ -6,6 +6,10 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
+  # Automatically delete Applications when cluster directory is removed
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+
   # Use Git Generator to discover all GCP cluster directories
   generators:
     - git:
