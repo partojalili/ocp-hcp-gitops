@@ -77,13 +77,13 @@ spec:
 
           # Merge in pull secret
           echo "Merging pull secret..."
-          PULL_SECRET=$(cat /secrets/pull-secret/pull-secret)
+          PULL_SECRET=$(cat /secrets/pull-secret/.dockerconfigjson)
           cat install-config.yaml | sed "s|PULL_SECRET_PLACEHOLDER|${PULL_SECRET}|" > install-config-merged.yaml
           mv install-config-merged.yaml install-config.yaml
 
           # Merge in SSH public key
           echo "Merging SSH key..."
-          SSH_KEY=$(cat /secrets/ssh-key/ssh-public-key)
+          SSH_KEY=$(cat /secrets/ssh-key/ssh-publickey)
           cat install-config.yaml | sed "s|SSH_KEY_PLACEHOLDER|${SSH_KEY}|" > install-config-merged.yaml
           mv install-config-merged.yaml install-config.yaml
 
@@ -162,10 +162,10 @@ spec:
       volumes:
       - name: gcp-credentials
         secret:
-          secretName: gcp-service-account
+          secretName: ${{ values.clusterName }}-gcp-credentials
       - name: pull-secret
         secret:
-          secretName: openshift-pull-secret
+          secretName: ${{ values.clusterName }}-pull-secret
       - name: ssh-key
         secret:
-          secretName: cluster-ssh-key
+          secretName: ${{ values.clusterName }}-ssh-key

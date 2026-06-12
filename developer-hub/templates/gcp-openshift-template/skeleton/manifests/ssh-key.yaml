@@ -1,0 +1,17 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: ${{ values.clusterName }}-ssh-key
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: hcp-secrets-store
+    kind: ClusterSecretStore
+  target:
+    name: ${{ values.clusterName }}-ssh-key
+    creationPolicy: Owner
+  data:
+    - secretKey: ssh-publickey
+      remoteRef:
+        key: ocp-ssh-key
+        property: ssh-publickey
