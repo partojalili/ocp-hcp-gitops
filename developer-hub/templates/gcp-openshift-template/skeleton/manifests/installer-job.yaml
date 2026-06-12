@@ -69,11 +69,9 @@ spec:
           curl -sfL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz" | tar xzf -
           chmod +x openshift-install
 
-          # Create install-config.yaml
+          # Copy install-config from ConfigMap mount
           echo "Creating install-config.yaml..."
-          cat > install-config.yaml <<'EOF'
-          ${{ values.installConfig }}
-          EOF
+          cp /config/install-config.yaml install-config.yaml
 
           # Merge in pull secret
           echo "Merging pull secret..."
@@ -141,6 +139,9 @@ spec:
           value: "${{ values.openshiftVersion }}"
 
         volumeMounts:
+        - name: install-config
+          mountPath: /config
+          readOnly: true
         - name: gcp-credentials
           mountPath: /secrets/gcp
           readOnly: true
@@ -160,6 +161,9 @@ spec:
             cpu: "1000m"
 
       volumes:
+      - name: install-config
+        configMap:
+          name: ${{ values.clusterName }}-install-config
       - name: gcp-credentials
         secret:
           secretName: ${{ values.clusterName }}-gcp-credentials
