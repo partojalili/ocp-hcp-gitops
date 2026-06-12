@@ -1,0 +1,16 @@
+# ArgoCD Ignore File
+# These files are for documentation/catalog only, not Kubernetes resources
+
+# Developer Hub catalog entry
+catalog-info.yaml
+
+# Documentation
+README.md
+*.md
+
+# OpenShift installer config (not a K8s resource)
+install-config.yaml
+
+# Backup files
+*.backup
+*.bak
