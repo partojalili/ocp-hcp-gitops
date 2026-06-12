@@ -1,9 +1,0 @@
-# This directory contains Kubernetes manifests for the cluster
-# Place any Kubernetes resources here that should be synced by ArgoCD
-#
-# Examples:
-# - ConfigMaps
-# - Secrets (sealed)
-# - Namespaces
-# - Operators
-# - Custom resources
