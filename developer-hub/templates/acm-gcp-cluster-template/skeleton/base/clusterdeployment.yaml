@@ -1,0 +1,37 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: ${{ values.clusterName }}
+  namespace: ${{ values.clusterName }}
+  labels:
+    cluster-name: ${{ values.clusterName }}
+    platform: gcp
+    vendor: OpenShift
+    cloud: GCP
+spec:
+  baseDomain: ${{ values.baseDomain }}
+  clusterName: ${{ values.clusterName }}
+
+  # Control plane configuration
+  controlPlaneConfig:
+    servingCertificates: {}
+
+  # Install platform
+  platform:
+    gcp:
+      credentialsSecretRef:
+        name: ${{ values.clusterName }}-gcp-creds
+      region: ${{ values.gcpRegion }}
+
+  # Provisioning details
+  provisioning:
+    installConfigSecretRef:
+      name: ${{ values.clusterName }}-install-config
+    sshPrivateKeySecretRef:
+      name: ${{ values.clusterName }}-ssh-private-key
+    imageSetRef:
+      name: openshift-v${{ values.openshiftVersion }}
+
+  # Pull secret
+  pullSecretRef:
+    name: ${{ values.clusterName }}-pull-secret

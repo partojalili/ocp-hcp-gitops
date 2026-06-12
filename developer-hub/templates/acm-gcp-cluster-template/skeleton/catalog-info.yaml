@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: ${{ values.clusterName }}
+  description: ACM-managed OpenShift cluster on GCP - ${{ values.clusterName }}
+  labels:
+    platform: gcp
+    cluster-type: openshift
+    provisioning: acm
+    cloud: gcp
+  annotations:
+    argocd/app-name: acm-gcp-cluster-${{ values.clusterName }}
+spec:
+  type: kubernetes-cluster
+  lifecycle: production
+  system: openshift-infrastructure
+  dependsOn:
+    - resource:default/acm-hub

@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: acm-gcp-openshift-clusters
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  # Automatically delete Applications when cluster directory is removed
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+
+  # Use Git Generator to discover all ACM GCP cluster directories
+  generators:
+    - git:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        revision: main
+        directories:
+          - path: clusters/acm-gcp/*
+
+  # Template for creating Applications
+  template:
+    metadata:
+      name: 'acm-gcp-cluster-{{path.basename}}'
+      namespace: openshift-gitops
+      labels:
+        cluster-name: '{{path.basename}}'
+        platform: gcp
+        cluster-type: openshift
+        provisioning: acm
+        managed-by: applicationset
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: '.'
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        targetRevision: main
+        path: '{{path}}/base'
+
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{path.basename}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      # Ignore differences in status fields
+      ignoreDifferences:
+        - group: '*'
+          kind: '*'
+          jsonPointers:
+            - /status

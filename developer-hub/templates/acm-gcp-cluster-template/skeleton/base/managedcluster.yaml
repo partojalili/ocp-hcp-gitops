@@ -1,0 +1,13 @@
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: ${{ values.clusterName }}
+  labels:
+    cluster-name: ${{ values.clusterName }}
+    platform: gcp
+    vendor: OpenShift
+    cloud: GCP
+    name: ${{ values.clusterName }}
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60

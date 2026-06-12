@@ -1,0 +1,193 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: acm-gcp-cluster-template
+  title: ACM-Managed OpenShift Cluster on GCP
+  description: Provision an ACM-managed OpenShift cluster on Google Cloud Platform
+  tags:
+    - acm
+    - openshift
+    - gcp
+    - kubernetes
+    - cloud
+spec:
+  type: infrastructure
+
+  parameters:
+    - title: Cluster Configuration
+      required:
+        - clusterName
+        - gcpRegion
+      properties:
+        clusterName:
+          title: Cluster Name
+          type: string
+          description: Name of the OpenShift cluster (lowercase alphanumeric and hyphens only)
+          pattern: '^[a-z0-9-]+$'
+          maxLength: 15
+          ui:autofocus: true
+          ui:help: 'Example: dev-cluster, prod-ocp-01 (max 15 chars)'
+
+        gcpRegion:
+          title: GCP Region
+          type: string
+          description: GCP region where the cluster will be deployed
+          default: us-east1
+          enum:
+            - us-central1
+            - us-east1
+            - us-east4
+            - us-west1
+            - us-west2
+            - europe-west1
+            - europe-west2
+            - asia-southeast1
+          enumNames:
+            - 'us-central1 (Iowa)'
+            - 'us-east1 (South Carolina)'
+            - 'us-east4 (Virginia)'
+            - 'us-west1 (Oregon)'
+            - 'us-west2 (Los Angeles)'
+            - 'europe-west1 (Belgium)'
+            - 'europe-west2 (London)'
+            - 'asia-southeast1 (Singapore)'
+          ui:help: 'Choose the region closest to your users'
+
+        baseDomain:
+          title: Base Domain
+          type: string
+          description: Base domain for cluster routes
+          default: gcp.lab.mjbz.dev
+          ui:help: 'DNS must be configured in Cloud DNS'
+
+    - title: Cluster Size & Version
+      required:
+        - openshiftVersion
+        - workerCount
+      properties:
+        openshiftVersion:
+          title: OpenShift Version
+          type: string
+          description: OpenShift version to install
+          default: '4.21.19'
+          enum:
+            - '4.22.1'
+            - '4.21.19'
+            - '4.21.18'
+          enumNames:
+            - '4.22.1 (Latest)'
+            - '4.21.19 (Stable - Recommended)'
+            - '4.21.18'
+          ui:help: 'Recommended: Use 4.21.19 stable'
+
+        workerCount:
+          title: Worker Node Count
+          type: integer
+          description: Number of worker nodes
+          default: 3
+          minimum: 2
+          maximum: 10
+          ui:help: 'Minimum 2, recommended 3 for HA'
+
+        workerMachineType:
+          title: Worker Machine Type
+          type: string
+          description: GCP machine type for worker nodes
+          default: n2-standard-4
+          enum:
+            - n2-standard-2
+            - n2-standard-4
+            - n2-standard-8
+            - n2-standard-16
+          enumNames:
+            - 'n2-standard-2 (2 vCPU, 8 GB RAM) - Dev/Test'
+            - 'n2-standard-4 (4 vCPU, 16 GB RAM) - Recommended'
+            - 'n2-standard-8 (8 vCPU, 32 GB RAM)'
+            - 'n2-standard-16 (16 vCPU, 64 GB RAM)'
+
+        masterMachineType:
+          title: Control Plane Machine Type
+          type: string
+          description: GCP machine type for control plane nodes
+          default: n2-standard-4
+          enum:
+            - n2-standard-4
+            - n2-standard-8
+            - n2-standard-16
+          enumNames:
+            - 'n2-standard-4 (4 vCPU, 16 GB RAM) - Recommended'
+            - 'n2-standard-8 (8 vCPU, 32 GB RAM)'
+            - 'n2-standard-16 (16 vCPU, 64 GB RAM)'
+
+    - title: Repository Information
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - partojalili
+            allowedRepos:
+              - ocp-hcp-gitops
+          default: github.com?owner=partojalili&repo=ocp-hcp-gitops
+          ui:help: 'Select the GitHub repository for cluster configuration'
+
+        gitBranch:
+          title: Git Branch
+          type: string
+          description: Branch to commit the cluster configuration
+          default: main
+          ui:help: 'Use main or create a feature branch'
+
+  steps:
+    - id: fetch-base
+      name: Fetch Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          clusterName: ${{ parameters.clusterName }}
+          gcpProjectID: openenv-jdpff
+          gcpRegion: ${{ parameters.gcpRegion }}
+          baseDomain: ${{ parameters.baseDomain }}
+          openshiftVersion: ${{ parameters.openshiftVersion }}
+          masterMachineType: ${{ parameters.masterMachineType }}
+          workerCount: ${{ parameters.workerCount }}
+          workerMachineType: ${{ parameters.workerMachineType }}
+          repoUrl: https://github.com/partojalili/ocp-hcp-gitops.git
+          gitBranch: ${{ parameters.gitBranch }}
+          timestamp: ${{ '' | now }}
+
+    - id: publish
+      name: Create Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        branchName: acm-cluster-${{ parameters.clusterName }}
+        title: 'Add ACM-managed GCP cluster: ${{ parameters.clusterName }}'
+        description: |
+          ## New ACM-Managed GCP OpenShift Cluster: ${{ parameters.clusterName }}
+
+          **Configuration:**
+          - Region: ${{ parameters.gcpRegion }}
+          - OpenShift Version: ${{ parameters.openshiftVersion }}
+          - Workers: ${{ parameters.workerCount }} x ${{ parameters.workerMachineType }}
+          - Masters: 3 x ${{ parameters.masterMachineType }}
+
+          **Provisioning Method:** ACM Hive Operator
+
+          This cluster will be visible in ACM immediately after sync.
+        targetPath: clusters/acm-gcp/${{ parameters.clusterName }}
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+        icon: github
+      - title: View Cluster Config (after PR merge)
+        url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/clusters/acm-gcp/${{ parameters.clusterName }}
