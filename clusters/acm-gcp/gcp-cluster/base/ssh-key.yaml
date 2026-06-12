@@ -1,0 +1,18 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gcp-cluster-ssh-key
+  namespace: gcp-cluster
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: hcp-secrets-store
+    kind: ClusterSecretStore
+  target:
+    name: gcp-cluster-ssh-private-key
+    creationPolicy: Owner
+  data:
+    - secretKey: ssh-privatekey
+      remoteRef:
+        key: ocp-ssh-key
+        property: ssh-publickey
