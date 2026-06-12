@@ -8,5 +8,3 @@ resources:
   - gcp-creds.yaml
   - install-config.yaml
   - clusterdeployment.yaml
-  - managedcluster.yaml
-  - klusterletaddonconfig.yaml

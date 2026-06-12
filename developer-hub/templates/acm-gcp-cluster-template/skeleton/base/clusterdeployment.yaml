@@ -30,7 +30,7 @@ spec:
     sshPrivateKeySecretRef:
       name: ${{ values.clusterName }}-ssh-private-key
     imageSetRef:
-      name: openshift-v${{ values.openshiftVersion }}
+      name: img${{ values.openshiftVersion }}-x86-64-appsub
 
   # Pull secret
   pullSecretRef:
