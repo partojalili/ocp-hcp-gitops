@@ -11,6 +11,8 @@ spec:
   target:
     name: ${{ values.clusterName }}-gcp-creds
     creationPolicy: Owner
-  dataFrom:
-    - extract:
+  data:
+    - secretKey: osServiceAccount.json
+      remoteRef:
         key: gcp-service-account
+        property: service-account.json
