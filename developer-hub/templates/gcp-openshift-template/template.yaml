@@ -189,7 +189,7 @@ spec:
           workerMachineType: ${{ parameters.workerMachineType }}
           networkType: ${{ parameters.networkType }}
           enableFIPS: ${{ parameters.enableFIPS }}
-          repoUrl: ${{ parameters.repoUrl }}
+          repoUrl: https://github.com/partojalili/ocp-hcp-gitops.git
           gitBranch: ${{ parameters.gitBranch }}
           timestamp: ${{ '' | now }}
 

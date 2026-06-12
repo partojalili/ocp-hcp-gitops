@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: github.com?owner=partojalili&repo=ocp-hcp-gitops
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
     targetRevision: main
     path: clusters/gcp/gcp-cluster/manifests
   destination:
