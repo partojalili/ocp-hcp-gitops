@@ -194,28 +194,28 @@ spec:
           timestamp: ${{ '' | now }}
 
     - id: publish
-      name: Publish to GitHub
-      action: publish:github
+      name: Create Pull Request
+      action: publish:github:pull-request
       input:
-        description: OpenShift cluster configuration for ${{ parameters.clusterName }}
         repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: ${{ parameters.gitBranch }}
-        gitCommitMessage: 'Add OpenShift GCP cluster: ${{ parameters.clusterName }}'
-        sourcePath: clusters/gcp/${{ parameters.clusterName }}
+        branchName: cluster-${{ parameters.clusterName }}
+        title: 'Add OpenShift GCP cluster: ${{ parameters.clusterName }}'
+        description: |
+          ## New GCP OpenShift Cluster: ${{ parameters.clusterName }}
 
-    - id: register
-      name: Register in Catalog
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
-        catalogInfoPath: '/clusters/gcp/${{ parameters.clusterName }}/catalog-info.yaml'
+          **Configuration:**
+          - Region: ${{ parameters.gcpRegion }}
+          - OpenShift Version: ${{ parameters.openshiftVersion }}
+          - Workers: ${{ parameters.workerCount }} x ${{ parameters.workerMachineType }}
+          - Masters: 3 x ${{ parameters.masterMachineType }}
+
+          This PR adds the cluster configuration files for provisioning.
+        targetPath: clusters/gcp/${{ parameters.clusterName }}
 
   output:
     links:
-      - title: Repository
+      - title: View Pull Request
         url: ${{ steps.publish.output.remoteUrl }}
-      - title: Open in catalog
-        icon: catalog
-        entityRef: ${{ steps.register.output.entityRef }}
-      - title: View Cluster Config
-        url: ${{ steps.publish.output.repoContentsUrl }}/clusters/gcp/${{ parameters.clusterName }}
+        icon: github
+      - title: View Cluster Config (after PR merge)
+        url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/clusters/gcp/${{ parameters.clusterName }}
