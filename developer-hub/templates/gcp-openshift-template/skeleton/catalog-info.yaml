@@ -21,7 +21,7 @@ metadata:
 spec:
   type: kubernetes-cluster
   lifecycle: production
-  owner: platform-team
+  owner: user:development/guest
   system: infrastructure
   metadata:
     platform: gcp

@@ -12,7 +12,7 @@ metadata:
     - ipi
 spec:
   type: infrastructure
-  owner: platform-team
+  owner: user:development/guest
 
   parameters:
     - title: Cluster Configuration
