@@ -9,9 +9,23 @@ data:
       # Catalog refresh interval (5 minutes)
       providers:
         github:
+          # Templates discovery
           providerId:
             organization: 'partojalili'
             catalogPath: '/developer-hub/templates/**/template.yaml'
+            filters:
+              branch: 'main'
+              repository: 'ocp-hcp-gitops'
+            schedule:
+              frequency:
+                minutes: 5
+              timeout:
+                minutes: 3
+
+          # Components and other entities discovery
+          providerId2:
+            organization: 'partojalili'
+            catalogPath: '/**/catalog-info.yaml'
             filters:
               branch: 'main'
               repository: 'ocp-hcp-gitops'
