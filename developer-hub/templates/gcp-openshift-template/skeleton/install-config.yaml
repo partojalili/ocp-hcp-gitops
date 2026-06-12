@@ -27,8 +27,8 @@ networking:
   - 172.30.0.0/16
   machineNetwork:
   - cidr: 10.0.0.0/16
-pullSecret: '{{ "{{" }} .PullSecret {{ "}}" }}'
-sshKey: '{{ "{{" }} .SSHKey {{ "}}" }}'
+pullSecret: 'PULL_SECRET_PLACEHOLDER'
+sshKey: 'SSH_KEY_PLACEHOLDER'
 {% if values.enableFIPS %}
 fips: true
 {% endif %}
