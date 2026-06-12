@@ -1,0 +1,16 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gcp-cluster-gcp-creds
+  namespace: gcp-cluster
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: hcp-secrets-store
+    kind: ClusterSecretStore
+  target:
+    name: gcp-cluster-gcp-creds
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: gcp-service-account
