@@ -43,8 +43,14 @@ data:
           rules:
             - allow: [Template]
 
-        # OpenShift GCP Cluster Template
+        # OpenShift GCP Cluster Template (IPI - Standalone)
         - type: url
           target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/gcp-openshift-template/template.yaml
+          rules:
+            - allow: [Template]
+
+        # ACM-Managed GCP Cluster Template
+        - type: url
+          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/acm-gcp-cluster-template/template.yaml
           rules:
             - allow: [Template]
