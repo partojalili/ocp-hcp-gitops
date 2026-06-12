@@ -191,8 +191,6 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        allowedHosts:
-          - github.com
         description: OpenShift cluster configuration for ${{ parameters.clusterName }}
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: ${{ parameters.gitBranch }}
