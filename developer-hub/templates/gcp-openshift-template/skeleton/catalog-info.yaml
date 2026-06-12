@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: ${{ values.clusterName }}
+  description: OpenShift cluster on GCP - ${{ values.clusterName }}
+  annotations:
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - openshift
+    - gcp
+    - kubernetes
+    - ${{ values.gcpRegion }}
+  links:
+    - url: https://console.cloud.google.com/home/dashboard?project=${{ values.gcpProjectID }}
+      title: GCP Console
+      icon: cloud
+    - url: https://console-openshift-console.apps.${{ values.clusterName }}.${{ values.baseDomain }}
+      title: OpenShift Console
+      icon: dashboard
+spec:
+  type: kubernetes-cluster
+  lifecycle: production
+  owner: platform-team
+  system: infrastructure
+  metadata:
+    platform: gcp
+    region: ${{ values.gcpRegion }}
+    version: ${{ values.openshiftVersion }}
+    workerCount: ${{ values.workerCount }}
+    workerType: ${{ values.workerMachineType }}
+    masterType: ${{ values.masterMachineType }}
+    createdAt: ${{ values.timestamp }}

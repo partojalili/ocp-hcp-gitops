@@ -1,0 +1,35 @@
+apiVersion: v1
+baseDomain: ${{ values.baseDomain }}
+metadata:
+  name: ${{ values.clusterName }}
+platform:
+  gcp:
+    projectID: ${{ values.gcpProjectID }}
+    region: ${{ values.gcpRegion }}
+controlPlane:
+  name: master
+  platform:
+    gcp:
+      type: ${{ values.masterMachineType }}
+  replicas: 3
+compute:
+- name: worker
+  platform:
+    gcp:
+      type: ${{ values.workerMachineType }}
+  replicas: ${{ values.workerCount }}
+networking:
+  networkType: ${{ values.networkType }}
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  serviceNetwork:
+  - 172.30.0.0/16
+  machineNetwork:
+  - cidr: 10.0.0.0/16
+pullSecret: '{{ "{{" }} .PullSecret {{ "}}" }}'
+sshKey: '{{ "{{" }} .SSHKey {{ "}}" }}'
+{% if values.enableFIPS %}
+fips: true
+{% endif %}
+publish: External

@@ -1,0 +1,218 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: openshift-gcp-cluster-template
+  title: OpenShift Cluster on GCP
+  description: Provision a new OpenShift cluster on Google Cloud Platform using IPI
+  tags:
+    - openshift
+    - gcp
+    - kubernetes
+    - cloud
+    - ipi
+spec:
+  type: infrastructure
+  owner: platform-team
+
+  parameters:
+    - title: Cluster Configuration
+      required:
+        - clusterName
+        - gcpRegion
+      properties:
+        clusterName:
+          title: Cluster Name
+          type: string
+          description: Name of the OpenShift cluster (lowercase alphanumeric and hyphens only)
+          pattern: '^[a-z0-9-]+$'
+          maxLength: 15
+          ui:autofocus: true
+          ui:help: 'Example: dev-cluster, prod-ocp-01 (max 15 chars)'
+
+        gcpRegion:
+          title: GCP Region
+          type: string
+          description: GCP region where the cluster will be deployed
+          default: us-east1
+          enum:
+            - us-central1
+            - us-east1
+            - us-east4
+            - us-west1
+            - us-west2
+            - europe-west1
+            - europe-west2
+            - asia-southeast1
+          enumNames:
+            - 'us-central1 (Iowa)'
+            - 'us-east1 (South Carolina)'
+            - 'us-east4 (Virginia)'
+            - 'us-west1 (Oregon)'
+            - 'us-west2 (Los Angeles)'
+            - 'europe-west1 (Belgium)'
+            - 'europe-west2 (London)'
+            - 'asia-southeast1 (Singapore)'
+          ui:help: 'Choose the region closest to your users'
+
+        baseDomain:
+          title: Base Domain
+          type: string
+          description: Base domain for cluster routes (e.g., gcp.example.com)
+          default: gcp.openshift.example.com
+          ui:help: 'DNS must be configured in Cloud DNS or delegated to GCP'
+
+    - title: Cluster Size & Version
+      required:
+        - openshiftVersion
+        - workerCount
+        - workerMachineType
+      properties:
+        openshiftVersion:
+          title: OpenShift Version
+          type: string
+          description: OpenShift version to install
+          default: '4.16'
+          enum:
+            - '4.16'
+            - '4.15'
+            - '4.14'
+          enumNames:
+            - '4.16 (Latest)'
+            - '4.15 (Stable)'
+            - '4.14 (LTS)'
+          ui:help: 'Recommended: Use latest stable version'
+
+        masterMachineType:
+          title: Control Plane Machine Type
+          type: string
+          description: GCP machine type for control plane nodes
+          default: n2-standard-4
+          enum:
+            - n2-standard-4
+            - n2-standard-8
+            - n2-standard-16
+          enumNames:
+            - 'n2-standard-4 (4 vCPU, 16 GB RAM) - Recommended'
+            - 'n2-standard-8 (8 vCPU, 32 GB RAM)'
+            - 'n2-standard-16 (16 vCPU, 64 GB RAM)'
+          ui:help: 'Standard: n2-standard-4 for most workloads'
+
+        workerCount:
+          title: Number of Worker Nodes
+          type: integer
+          description: Number of worker nodes to provision
+          default: 3
+          minimum: 2
+          maximum: 10
+          ui:help: 'Minimum 2 for HA, recommended 3 for production'
+
+        workerMachineType:
+          title: Worker Machine Type
+          type: string
+          description: GCP machine type for worker nodes
+          default: n2-standard-4
+          enum:
+            - n2-standard-2
+            - n2-standard-4
+            - n2-standard-8
+            - n2-standard-16
+            - n2-highmem-4
+            - n2-highmem-8
+          enumNames:
+            - 'n2-standard-2 (2 vCPU, 8 GB RAM)'
+            - 'n2-standard-4 (4 vCPU, 16 GB RAM) - Recommended'
+            - 'n2-standard-8 (8 vCPU, 32 GB RAM)'
+            - 'n2-standard-16 (16 vCPU, 64 GB RAM)'
+            - 'n2-highmem-4 (4 vCPU, 32 GB RAM) - Memory optimized'
+            - 'n2-highmem-8 (8 vCPU, 64 GB RAM) - Memory optimized'
+          ui:help: 'Choose based on your workload requirements'
+
+    - title: Network Configuration
+      properties:
+        networkType:
+          title: Network Type
+          type: string
+          description: SDN plugin for the cluster
+          default: OVNKubernetes
+          enum:
+            - OVNKubernetes
+            - OpenShiftSDN
+          enumNames:
+            - 'OVN-Kubernetes (Recommended for 4.15+)'
+            - 'OpenShift SDN (Legacy)'
+          ui:help: 'OVN-Kubernetes is the default for new clusters'
+
+        enableFIPS:
+          title: Enable FIPS Mode
+          type: boolean
+          description: Enable FIPS 140-2 cryptographic validation
+          default: false
+          ui:help: 'Enable if required for compliance (may impact performance)'
+
+    - title: Git Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository URL
+          type: string
+          description: Git repository where cluster config will be stored
+          default: https://github.com/partojalili/ocp-hcp-gitops.git
+          ui:help: 'ArgoCD will sync cluster manifests from this repository'
+
+        gitBranch:
+          title: Git Branch
+          type: string
+          description: Branch to commit the cluster configuration
+          default: main
+          ui:help: 'Use main or create a feature branch'
+
+  steps:
+    - id: fetch-base
+      name: Fetch Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          clusterName: ${{ parameters.clusterName }}
+          gcpProjectID: openenv-jdpff
+          gcpRegion: ${{ parameters.gcpRegion }}
+          baseDomain: ${{ parameters.baseDomain }}
+          openshiftVersion: ${{ parameters.openshiftVersion }}
+          masterMachineType: ${{ parameters.masterMachineType }}
+          workerCount: ${{ parameters.workerCount }}
+          workerMachineType: ${{ parameters.workerMachineType }}
+          networkType: ${{ parameters.networkType }}
+          enableFIPS: ${{ parameters.enableFIPS }}
+          repoUrl: ${{ parameters.repoUrl }}
+          gitBranch: ${{ parameters.gitBranch }}
+          timestamp: ${{ '' | now }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts:
+          - github.com
+        description: OpenShift cluster configuration for ${{ parameters.clusterName }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: ${{ parameters.gitBranch }}
+        gitCommitMessage: 'Add OpenShift GCP cluster: ${{ parameters.clusterName }}'
+        sourcePath: clusters/gcp/${{ parameters.clusterName }}
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/clusters/gcp/${{ parameters.clusterName }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
+      - title: View Cluster Config
+        url: ${{ steps.publish.output.repoContentsUrl }}/clusters/gcp/${{ parameters.clusterName }}

@@ -1,4 +1,4 @@
-apiVersion: rhdh.redhat.com/v1alpha3
+apiVersion: rhdh.redhat.com/v1alpha5
 kind: Backstage
 metadata:
   name: developer-hub
@@ -17,4 +17,4 @@ spec:
     dynamicPluginsConfigMapName: backstage-dynamic-plugins
     extraEnvs:
       secrets:
-        - name: backstage-github-app
+        - name: backstage-github-secret
