@@ -70,15 +70,17 @@ spec:
           title: OpenShift Version
           type: string
           description: OpenShift version to install
-          default: '4.16'
+          default: '4.20'
           enum:
-            - '4.16'
-            - '4.15'
-            - '4.14'
+            - '4.20'
+            - '4.19'
+            - '4.18'
+            - '4.17'
           enumNames:
-            - '4.16 (Latest)'
-            - '4.15 (Stable)'
-            - '4.14 (LTS)'
+            - '4.20 (Latest)'
+            - '4.19 (Stable)'
+            - '4.18'
+            - '4.17'
           ui:help: 'Recommended: Use latest stable version'
 
         masterMachineType:
