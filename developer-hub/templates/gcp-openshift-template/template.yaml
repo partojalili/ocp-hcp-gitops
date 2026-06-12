@@ -155,11 +155,15 @@ spec:
         - repoUrl
       properties:
         repoUrl:
-          title: Repository URL
+          title: Repository Location
           type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
           description: Git repository where cluster config will be stored
-          default: https://github.com/partojalili/ocp-hcp-gitops.git
-          ui:help: 'ArgoCD will sync cluster manifests from this repository'
+          default: github.com?owner=partojalili&repo=ocp-hcp-gitops
+          ui:help: 'Select the GitHub repository for cluster configuration'
 
         gitBranch:
           title: Git Branch
