@@ -12,7 +12,6 @@ metadata:
     - ipi
 spec:
   type: infrastructure
-  owner: user:development/guest
 
   parameters:
     - title: Cluster Configuration
