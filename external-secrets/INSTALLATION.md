@@ -12,7 +12,63 @@ This guide provides step-by-step instructions to install and configure External 
 
 ## Installation Steps
 
-### Step 1: Install External Secrets Operator via Helm
+### Step 1: Install External Secrets Operator
+
+**Option A: Red Hat OpenShift Operator (Recommended for OpenShift)**
+
+Install via the OpenShift OperatorHub:
+
+```bash
+# Install the Red Hat External Secrets Operator from OperatorHub
+# This can be done through the OpenShift Console:
+# 1. Navigate to Operators → OperatorHub
+# 2. Search for "External Secrets Operator"
+# 3. Install the Red Hat certified version
+
+# Or via CLI:
+cat <<EOF | oc apply -f -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: external-secrets-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: external-secrets-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+```
+
+**Create ExternalSecretsConfig (Required for Red Hat Operator):**
+
+```bash
+cat <<EOF | oc apply -f -
+apiVersion: operator.openshift.io/v1alpha1
+kind: ExternalSecretsConfig
+metadata:
+  name: cluster
+spec:
+  logLevel: Normal
+EOF
+```
+
+**Verify installation:**
+```bash
+# Check operator pod is running
+oc get pods -n external-secrets-operator
+
+# Check that External Secrets controllers are deployed
+oc get pods -n external-secrets
+
+# Expected output in external-secrets namespace:
+# external-secrets-*                    1/1     Running
+# external-secrets-cert-controller-*    1/1     Running
+# external-secrets-webhook-*            1/1     Running
+```
+
+**Option B: Upstream Helm Installation**
 
 ```bash
 # Add the External Secrets Helm repository
@@ -26,17 +82,6 @@ helm install external-secrets \
   --create-namespace \
   --set installCRDs=true \
   --set webhook.port=9443
-```
-
-**Verify installation:**
-```bash
-# Check pods are running
-oc get pods -n external-secrets-operator
-
-# Expected output:
-# external-secrets-*                   1/1     Running
-# external-secrets-cert-controller-*   1/1     Running
-# external-secrets-webhook-*           1/1     Running
 ```
 
 ### Step 2: Create Central Secrets Namespace
@@ -98,11 +143,14 @@ spec:
       # Read secrets from hcp-secrets namespace
       remoteNamespace: hcp-secrets
       server:
-        # Use in-cluster service account
+        # Use in-cluster Kubernetes API
+        url: kubernetes.default
+        # CA certificate for API server verification
         caProvider:
           type: ConfigMap
           name: kube-root-ca.crt
           key: ca.crt
+          namespace: hcp-secrets  # REQUIRED: namespace where ConfigMap is located
       auth:
         # Use a service account with read access to hcp-secrets
         serviceAccount:
@@ -160,27 +208,31 @@ subjects:
     name: external-secrets-sa
     namespace: hcp-secrets
 ---
+# Token creator role - allows External Secrets controller to create service account tokens
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: external-secrets-token-creator
+  namespace: hcp-secrets
 rules:
   - apiGroups: [""]
     resources: ["serviceaccounts/token"]
     verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: external-secrets-token-creator
+  namespace: hcp-secrets
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: external-secrets-token-creator
 subjects:
+  # Red Hat operator uses 'external-secrets' SA in 'external-secrets' namespace
   - kind: ServiceAccount
     name: external-secrets
-    namespace: external-secrets-operator
+    namespace: external-secrets
 ```
 
 Apply the RBAC configuration:
@@ -299,21 +351,67 @@ See [EXTERNAL-SECRETS-SETUP.md](../developer-hub/EXTERNAL-SECRETS-SETUP.md) for 
 
 ## Troubleshooting
 
-### ClusterSecretStore shows "Invalid" status
+### ClusterSecretStore shows "Invalid" or "Not Ready" status
 
 ```bash
 # Check ClusterSecretStore details
 oc describe clustersecretstore hcp-secrets-store
 
+# Check ClusterSecretStore status
+oc get clustersecretstore hcp-secrets-store -o jsonpath='{.status}'
+
 # Common issues:
 # 1. Service account doesn't exist or lacks permissions
 # 2. hcp-secrets namespace doesn't exist
 # 3. RBAC not configured correctly
+# 4. Missing namespace field in caProvider (Red Hat operator issue)
+# 5. External Secrets controllers not running (check ExternalSecretsConfig)
 
 # Fix: Verify service account and RBAC
 oc get sa external-secrets-sa -n hcp-secrets
 oc get role external-secrets-reader -n hcp-secrets
 oc get rolebinding external-secrets-reader -n hcp-secrets
+oc get role external-secrets-token-creator -n hcp-secrets
+oc get rolebinding external-secrets-token-creator -n hcp-secrets
+
+# For Red Hat operator: Check if controllers are deployed
+oc get externalsecretsconfig cluster
+oc get pods -n external-secrets
+
+# If controllers are missing, ensure ExternalSecretsConfig exists
+```
+
+### Error: "missing namespace on caProvider secret"
+
+This error occurs when using a ClusterSecretStore (cluster-scoped) without specifying the namespace for the ConfigMap.
+
+**Fix:**
+```bash
+# Add namespace to caProvider in ClusterSecretStore
+oc patch clustersecretstore hcp-secrets-store --type='json' \
+  -p='[{"op": "add", "path": "/spec/provider/kubernetes/server/caProvider/namespace", "value": "hcp-secrets"}]'
+```
+
+### Red Hat Operator: Controllers Not Running
+
+If you installed the Red Hat External Secrets Operator but the controllers aren't running:
+
+```bash
+# Check if ExternalSecretsConfig exists
+oc get externalsecretsconfig cluster
+
+# If it doesn't exist, create it
+cat <<EOF | oc apply -f -
+apiVersion: operator.openshift.io/v1alpha1
+kind: ExternalSecretsConfig
+metadata:
+  name: cluster
+spec:
+  logLevel: Normal
+EOF
+
+# Wait for controllers to be deployed
+oc get pods -n external-secrets -w
 ```
 
 ### ExternalSecret shows "SecretSyncedError"
