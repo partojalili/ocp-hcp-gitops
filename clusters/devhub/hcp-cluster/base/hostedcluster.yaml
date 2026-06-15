@@ -30,7 +30,7 @@ spec:
 
   # DNS configuration
   dns:
-    baseDomain: cluster-ktzlw.dynamic2.redhatworkshops.io
+    baseDomain: apps.cluster-glctc.dynamic2.redhatworkshops.io
 
   # Platform: OpenShift Virtualization (KubeVirt)
   platform:
