@@ -54,3 +54,9 @@ data:
           target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/acm-gcp-cluster-template/template.yaml
           rules:
             - allow: [Template]
+
+        # Node.js JWT Authentication App Template
+        - type: url
+          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/templates/nodejs-auth-template/template.yaml
+          rules:
+            - allow: [Template]
