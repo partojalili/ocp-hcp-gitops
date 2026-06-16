@@ -128,7 +128,20 @@ oc get secrets -n hcp-secrets
 # ocp-ssh-key       Opaque                           1      5s
 ```
 
-### Step 4: Create ClusterSecretStore
+### Step 4: Create Service Account and RBAC
+
+Apply the RBAC configuration:
+```bash
+oc apply -f external-secrets/external-secrets-rbac.yaml
+```
+
+The file contains:
+- Service account: `external-secrets-sa`
+- Role: `external-secrets-reader` (read secrets)
+- Role: `external-secrets-token-creator` (create service account tokens)
+- RoleBindings for both roles
+
+### Step 5: Create ClusterSecretStore
 
 Create a file named `clustersecretstore.yaml`:
 
@@ -170,74 +183,6 @@ oc get clustersecretstore hcp-secrets-store
 # Expected output:
 # NAME                AGE   STATUS   READY
 # hcp-secrets-store   10s   Valid    True
-```
-
-### Step 5: Create Service Account and RBAC
-
-Create a file named `external-secrets-rbac.yaml`:
-
-```yaml
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: external-secrets-sa
-  namespace: hcp-secrets
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: external-secrets-reader
-  namespace: hcp-secrets
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: external-secrets-reader
-  namespace: hcp-secrets
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: external-secrets-reader
-subjects:
-  - kind: ServiceAccount
-    name: external-secrets-sa
-    namespace: hcp-secrets
----
-# Token creator role - allows External Secrets controller to create service account tokens
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: external-secrets-token-creator
-  namespace: hcp-secrets
-rules:
-  - apiGroups: [""]
-    resources: ["serviceaccounts/token"]
-    verbs: ["create"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: external-secrets-token-creator
-  namespace: hcp-secrets
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: external-secrets-token-creator
-subjects:
-  # Red Hat operator uses 'external-secrets' SA in 'external-secrets' namespace
-  - kind: ServiceAccount
-    name: external-secrets
-    namespace: external-secrets
-```
-
-Apply the RBAC configuration:
-```bash
-oc apply -f external-secrets-rbac.yaml
 ```
 
 ### Step 6: Configure ArgoCD RBAC for ExternalSecrets
