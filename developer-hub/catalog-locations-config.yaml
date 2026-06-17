@@ -61,12 +61,6 @@ data:
           rules:
             - allow: [Template]
 
-        # Node.js Component
-        - type: url
-          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/apps/nodejs/catalog-info.yaml
-          rules:
-            - allow: [Component, API]
-
         # Users and Groups
         - type: url
           target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/users.yaml
