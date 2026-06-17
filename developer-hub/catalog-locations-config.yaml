@@ -67,12 +67,6 @@ data:
           rules:
             - allow: [Component, API]
 
-        # HCP Cluster Component
-        - type: url
-          target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/clusters/devhub/hcp-cluster/catalog-info.yaml
-          rules:
-            - allow: [Component]
-
         # Users and Groups
         - type: url
           target: https://github.com/partojalili/ocp-hcp-gitops/blob/main/developer-hub/users.yaml
