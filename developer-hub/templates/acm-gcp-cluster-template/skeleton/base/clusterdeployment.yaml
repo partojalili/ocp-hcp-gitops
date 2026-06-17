@@ -8,6 +8,7 @@ metadata:
     platform: gcp
     vendor: OpenShift
     cloud: GCP
+    cluster.open-cluster-management.io/clusterset: global
 spec:
   baseDomain: ${{ values.baseDomain }}
   clusterName: ${{ values.clusterName }}
