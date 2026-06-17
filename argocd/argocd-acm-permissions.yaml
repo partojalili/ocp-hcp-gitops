@@ -49,6 +49,22 @@ rules:
       - update
       - watch
 
+  # Hive / ACM ClusterDeployments
+  - apiGroups:
+      - hive.openshift.io
+    resources:
+      - clusterdeployments
+      - machinesets
+      - machinepools
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
   # Sealed Secrets
   - apiGroups:
       - bitnami.com
