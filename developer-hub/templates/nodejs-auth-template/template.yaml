@@ -66,6 +66,13 @@ spec:
           default: github.com?owner=partojalili&repo=ocp-hcp-gitops
           ui:help: 'The scaffolded app will be added to this repository via PR'
 
+        devSpacesUrl:
+          title: Dev Spaces URL
+          type: string
+          description: OpenShift Dev Spaces URL for this cluster
+          default: https://devspaces.apps.cluster-hqs5g.dynamic2.redhatworkshops.io
+          ui:help: 'The URL of OpenShift Dev Spaces on your cluster'
+
   steps:
     - id: fetch-base
       name: Fetch Base Template
@@ -79,6 +86,7 @@ spec:
           mongodbEnabled: ${{ parameters.mongodbEnabled }}
           databaseName: ${{ parameters.databaseName }}
           repoUrl: ${{ parameters.repoUrl }}
+          devSpacesUrl: ${{ parameters.devSpacesUrl }}
 
     - id: publish
       name: Create Pull Request
