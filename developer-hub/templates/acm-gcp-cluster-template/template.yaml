@@ -17,6 +17,7 @@ spec:
     - title: Cluster Configuration
       required:
         - clusterName
+        - gcpProjectID
         - gcpRegion
       properties:
         clusterName:
@@ -27,6 +28,13 @@ spec:
           maxLength: 15
           ui:autofocus: true
           ui:help: 'Example: dev-cluster, prod-ocp-01 (max 15 chars)'
+
+        gcpProjectID:
+          title: GCP Project ID
+          type: string
+          description: Google Cloud Project ID where the cluster will be deployed
+          default: openenv-tgdft
+          ui:help: 'Example: openenv-tgdft, my-project-123'
 
         gcpRegion:
           title: GCP Region
@@ -156,7 +164,7 @@ spec:
         url: ./skeleton
         values:
           clusterName: ${{ parameters.clusterName }}
-          gcpProjectID: openenv-jdpff
+          gcpProjectID: ${{ parameters.gcpProjectID }}
           gcpRegion: ${{ parameters.gcpRegion }}
           baseDomain: ${{ parameters.baseDomain }}
           openshiftVersion: ${{ parameters.openshiftVersion }}
