@@ -25,6 +25,8 @@ rules:
       - placements
       - placementdecisions
       - managedclustersetbindings
+      - managedclustersets
+      - managedclusters
     verbs:
       - create
       - delete
