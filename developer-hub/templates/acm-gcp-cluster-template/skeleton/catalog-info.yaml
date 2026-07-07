@@ -12,6 +12,7 @@ metadata:
     argocd/app-name: acm-gcp-cluster-${{ values.clusterName }}
 spec:
   type: kubernetes-cluster
+  owner: user:default/guest
   lifecycle: production
   system: openshift-infrastructure
   dependsOn:
