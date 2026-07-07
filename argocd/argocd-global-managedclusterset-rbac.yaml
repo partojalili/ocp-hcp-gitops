@@ -1,0 +1,90 @@
+---
+# ArgoCD permissions to manage clusters in the global ManagedClusterSet
+# This allows ArgoCD to create ClusterDeployments with the label:
+#   cluster.open-cluster-management.io/clusterset: global
+#
+# The ACM admission webhook validates that users have permission on the
+# managedclustersets/join subresource before allowing ClusterDeployment creation.
+#
+# Apply this with:
+#   oc apply -f argocd-global-managedclusterset-rbac.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: open-cluster-management:managedclusterset:admin:global
+  labels:
+    cluster.open-cluster-management.io/clusterset: global
+    cluster.open-cluster-management.io/role: admin
+rules:
+  # Allow getting and updating the global ManagedClusterSet
+  - apiGroups:
+      - cluster.open-cluster-management.io
+    resourceNames:
+      - global
+    resources:
+      - managedclustersets
+    verbs:
+      - get
+      - update
+
+  # Allow joining clusters to the global ManagedClusterSet
+  # This is the critical permission that the ACM webhook checks
+  - apiGroups:
+      - cluster.open-cluster-management.io
+    resourceNames:
+      - global
+    resources:
+      - managedclustersets/join
+    verbs:
+      - create
+
+  # Allow binding namespaces to the global ManagedClusterSet
+  - apiGroups:
+      - cluster.open-cluster-management.io
+    resourceNames:
+      - global
+    resources:
+      - managedclustersets/bind
+    verbs:
+      - create
+
+  # Allow creating ManagedClusters
+  - apiGroups:
+      - cluster.open-cluster-management.io
+    resources:
+      - managedclusters
+    verbs:
+      - create
+
+  # Allow accepting managed clusters
+  - apiGroups:
+      - register.open-cluster-management.io
+    resources:
+      - managedclusters/accept
+    verbs:
+      - update
+
+  # Allow viewing ManagedClusterSets
+  - apiGroups:
+      - clusterview.open-cluster-management.io
+    resources:
+      - managedclustersets
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-managedclusterset-global-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: open-cluster-management:managedclusterset:admin:global
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
