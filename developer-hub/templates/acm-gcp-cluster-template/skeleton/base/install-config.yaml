@@ -14,6 +14,7 @@ stringData:
       gcp:
         projectID: ${{ values.gcpProjectID }}
         region: ${{ values.gcpRegion }}
+        userProvisionedDNS: Enabled
     controlPlane:
       name: master
       platform:
