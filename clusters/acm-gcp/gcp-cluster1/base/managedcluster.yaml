@@ -1,0 +1,13 @@
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: gcp-cluster1
+  labels:
+    cloud: GCP
+    vendor: OpenShift
+    cluster.open-cluster-management.io/clusterset: global
+    name: gcp-cluster1
+    platform: gcp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
