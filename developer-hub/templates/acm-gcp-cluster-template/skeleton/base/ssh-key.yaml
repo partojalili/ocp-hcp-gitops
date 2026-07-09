@@ -15,4 +15,4 @@ spec:
     - secretKey: ssh-privatekey
       remoteRef:
         key: ocp-ssh-key
-        property: ssh-publickey
+        property: ssh-privatekey
