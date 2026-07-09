@@ -1,0 +1,31 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.name }}
+  description: Node.js application deployed to ${{ values.targetCluster }}
+  annotations:
+    argocd/app-name: ${{ values.name }}
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/kubernetes-id: ${{ values.name }}
+    backstage.io/kubernetes-namespace: ${{ values.namespace }}
+    backstage.io/kubernetes-cluster: ${{ values.targetCluster }}
+  tags:
+    - nodejs
+    - deployment
+    - ${{ values.targetCluster }}
+  links:
+    - url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/deployments/${{ values.name }}
+      title: Deployment Manifests
+      icon: github
+    {% if values.enableRoute %}
+    - url: https://${{ values.name }}-${{ values.namespace }}.apps.${{ values.targetCluster }}.gcp.redhatworkshops.io
+      title: Application URL
+      icon: web
+    {% endif %}
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/guest
+  system: nodejs-apps
+  dependsOn:
+    - component:default/nodejs

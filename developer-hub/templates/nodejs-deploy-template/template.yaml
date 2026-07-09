@@ -1,0 +1,155 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: nodejs-app-deploy
+  title: Deploy Node.js Application
+  description: Deploy Node.js application to a managed OpenShift cluster with Tekton pipeline
+  tags:
+    - nodejs
+    - deployment
+    - tekton
+    - pipeline
+    - openshift
+spec:
+  owner: user:default/guest
+  type: deployment
+
+  parameters:
+    - title: Application Configuration
+      required:
+        - name
+        - namespace
+        - targetCluster
+      properties:
+        name:
+          title: Application Name
+          type: string
+          description: Name of your application deployment
+          default: nodejs-app
+          ui:autofocus: true
+
+        namespace:
+          title: Namespace
+          type: string
+          description: Kubernetes namespace to deploy to
+          default: nodejs-app
+
+        targetCluster:
+          title: Target Cluster
+          type: string
+          description: Managed cluster to deploy to
+          default: gcp-cluster
+          enum:
+            - gcp-cluster
+            - local-cluster
+          enumNames:
+            - GCP Cluster
+            - Local Cluster (Hub)
+
+        imageRegistry:
+          title: Image Registry
+          type: string
+          description: Container image registry
+          default: quay.io
+
+        imageRepository:
+          title: Image Repository
+          type: string
+          description: Image repository path (e.g., username/nodejs-app)
+          default: partojalili/nodejs-app
+
+    - title: Application Settings
+      properties:
+        replicas:
+          title: Replicas
+          type: number
+          description: Number of application replicas
+          default: 2
+          minimum: 1
+          maximum: 10
+
+        port:
+          title: Application Port
+          type: number
+          description: Port the application listens on
+          default: 8080
+
+        enableRoute:
+          title: Enable Route
+          type: boolean
+          description: Create an OpenShift Route for external access
+          default: true
+
+        enablePipeline:
+          title: Enable Pipeline
+          type: boolean
+          description: Create Tekton pipeline for CI/CD
+          default: true
+
+  steps:
+    - id: fetch-base
+      name: Fetch Application Source
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          namespace: ${{ parameters.namespace }}
+          targetCluster: ${{ parameters.targetCluster }}
+          imageRegistry: ${{ parameters.imageRegistry }}
+          imageRepository: ${{ parameters.imageRepository }}
+          replicas: ${{ parameters.replicas }}
+          port: ${{ parameters.port }}
+          enableRoute: ${{ parameters.enableRoute }}
+          enablePipeline: ${{ parameters.enablePipeline }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Deployment manifests for ${{ parameters.name }}
+        repoUrl: github.com?owner=partojalili&repo=ocp-hcp-gitops
+        sourcePath: deployments/${{ parameters.name }}
+        targetPath: deployments/${{ parameters.name }}
+        gitCommitMessage: "Add deployment for ${{ parameters.name }} to ${{ parameters.targetCluster }}"
+        gitAuthorName: Developer Hub
+        gitAuthorEmail: devhub@redhat.com
+
+    - id: create-argocd-app
+      name: Create ArgoCD Application
+      action: cnoe:create-argocd-app
+      input:
+        appName: ${{ parameters.name }}
+        appNamespace: openshift-gitops
+        argoInstance: openshift-gitops/openshift-gitops
+        projectName: default
+        repoUrl: https://github.com/partojalili/ocp-hcp-gitops
+        path: deployments/${{ parameters.name }}
+        targetRevision: main
+        destinationServer: https://kubernetes.default.svc
+        destinationNamespace: ${{ parameters.namespace }}
+        syncPolicyAutomated: true
+        labels:
+          cluster: ${{ parameters.targetCluster }}
+          app-type: nodejs
+          managed-by: backstage
+
+    - id: register
+      name: Register Component
+      action: catalog:register
+      input:
+        repoContentsUrl: https://github.com/partojalili/ocp-hcp-gitops/blob/main
+        catalogInfoPath: '/deployments/${{ parameters.name }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/deployments/${{ parameters.name }}
+      - title: ArgoCD Application
+        url: https://openshift-gitops-server-openshift-gitops.apps.cluster-ptfhc.dyn.redhatworkshops.io/applications/${{ parameters.name }}
+      - title: Pipeline
+        url: https://console-openshift-console.apps.${{ parameters.targetCluster }}.gcp.redhatworkshops.io/k8s/ns/${{ parameters.namespace }}/tekton.dev~v1~PipelineRun
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

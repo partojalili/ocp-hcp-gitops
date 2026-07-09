@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${{ values.namespace }}
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  {% if values.enableRoute %}
+  - route.yaml
+  {% endif %}
+  {% if values.enablePipeline %}
+  - pipeline/
+  {% endif %}
+
+commonLabels:
+  app: ${{ values.name }}
+  app.kubernetes.io/name: ${{ values.name }}
+  app.kubernetes.io/component: backend
+  app.kubernetes.io/part-of: ${{ values.name }}
+  app.kubernetes.io/managed-by: argocd
