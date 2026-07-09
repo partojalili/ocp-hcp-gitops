@@ -13,7 +13,7 @@ stringData:
       name: gcp-cluster
     platform:
       gcp:
-        projectID: openenv-tgdft
+        projectID: openenv-d967h
         region: us-east1
         userProvisionedDNS: Enabled
     controlPlane:
