@@ -10,11 +10,7 @@ metadata:
     cloud: GCP
     cluster.open-cluster-management.io/clusterset: global
 spec:
-<<<<<<< HEAD
   baseDomain: dqp8z.gcp.redhatworkshops.io
-=======
-  baseDomain: d967h.gcp.redhatworkshops.io
->>>>>>> a1daedd (Restore gcp-cluster1 with correct GCP project configuration)
   clusterName: gcp-cluster1
 
   # Control plane configuration
