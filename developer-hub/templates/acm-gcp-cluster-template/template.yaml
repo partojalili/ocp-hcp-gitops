@@ -33,8 +33,8 @@ spec:
           title: GCP Project ID
           type: string
           description: Google Cloud Project ID where the cluster will be deployed
-          default: openenv-wxgzn
-          ui:help: 'Example: openenv-wxgzn, my-project-123'
+          default: openenv-d967h
+          ui:help: 'Example: openenv-d967h, my-project-123'
 
         gcpRegion:
           title: GCP Region
@@ -65,7 +65,7 @@ spec:
           title: Base Domain
           type: string
           description: Base domain for cluster routes
-          default: wxgzn.gcp.redhatworkshops.io
+          default: d967h.gcp.redhatworkshops.io
           ui:help: 'DNS must be configured in Cloud DNS'
 
     - title: Cluster Size & Version
