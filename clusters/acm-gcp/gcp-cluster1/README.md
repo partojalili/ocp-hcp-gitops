@@ -5,7 +5,11 @@
 - **Name**: `gcp-cluster1`
 - **Platform**: Google Cloud Platform (GCP)
 - **Region**: `us-east1`
+<<<<<<< HEAD
 - **Base Domain**: `dqp8z.gcp.redhatworkshops.io`
+=======
+- **Base Domain**: `d967h.gcp.redhatworkshops.io`
+>>>>>>> a1daedd (Restore gcp-cluster1 with correct GCP project configuration)
 - **OpenShift Version**: `4.20.24`
 - **Provisioning Method**: ACM Hive Operator
 
@@ -31,12 +35,20 @@ This cluster is managed by Red Hat Advanced Cluster Management (ACM). To view it
 
 ### Console URL
 ```
+<<<<<<< HEAD
 https://console-openshift-console.apps.gcp-cluster1.dqp8z.gcp.redhatworkshops.io
+=======
+https://console-openshift-console.apps.gcp-cluster1.d967h.gcp.redhatworkshops.io
+>>>>>>> a1daedd (Restore gcp-cluster1 with correct GCP project configuration)
 ```
 
 ### API URL
 ```
+<<<<<<< HEAD
 https://api.gcp-cluster1.dqp8z.gcp.redhatworkshops.io:6443
+=======
+https://api.gcp-cluster1.d967h.gcp.redhatworkshops.io:6443
+>>>>>>> a1daedd (Restore gcp-cluster1 with correct GCP project configuration)
 ```
 
 ### Getting Kubeconfig

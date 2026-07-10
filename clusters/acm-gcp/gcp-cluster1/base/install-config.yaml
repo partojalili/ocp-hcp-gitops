@@ -13,7 +13,7 @@ stringData:
       name: gcp-cluster1
     platform:
       gcp:
-        projectID: openenv-dqp8z
+        projectID: rhpds-345620
         region: us-east1
         userProvisionedDNS: Enabled
     controlPlane:
