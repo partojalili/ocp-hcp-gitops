@@ -8,14 +8,12 @@ stringData:
   install-config.yaml: |
     apiVersion: v1
     baseDomain: ${{ values.baseDomain }}
-    featureSet: TechPreviewNoUpgrade
     metadata:
       name: ${{ values.clusterName }}
     platform:
       gcp:
         projectID: ${{ values.gcpProjectID }}
         region: ${{ values.gcpRegion }}
-        userProvisionedDNS: Enabled
     controlPlane:
       name: master
       platform:
