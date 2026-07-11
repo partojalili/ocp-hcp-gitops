@@ -33,8 +33,8 @@ spec:
           title: GCP Project ID
           type: string
           description: Google Cloud Project ID where the cluster will be deployed
-          default: openenv-zc2p9
-          ui:help: 'Example: openenv-zc2p9, my-project-123'
+          default: openenv-86nk6
+          ui:help: 'Example: openenv-86nk6, my-project-123'
 
         gcpRegion:
           title: GCP Region
@@ -65,7 +65,7 @@ spec:
           title: Base Domain
           type: string
           description: Base domain for cluster routes
-          default: zc2p9.gcp.redhatworkshops.io
+          default: 86nk6.gcp.redhatworkshops.io
           ui:help: 'DNS must be configured in Cloud DNS'
 
     - title: Cluster Size & Version
