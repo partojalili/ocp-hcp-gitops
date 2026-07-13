@@ -45,14 +45,9 @@ spec:
         targetCluster:
           title: Target Cluster
           type: string
-          description: Select a managed cluster to deploy to
+          description: Enter the name of the managed cluster to deploy to
           default: hcp-cluster
-          enum:
-            - hcp-cluster
-            - local-cluster
-          enumNames:
-            - HCP Cluster
-            - Local Cluster (Hub)
+          ui:help: 'Run "oc get managedclusters" to see available clusters (e.g., gcp-cluster, hcp-cluster, local-cluster)'
 
         imageRegistry:
           title: Image Registry
