@@ -37,13 +37,13 @@ spec:
         targetCluster:
           title: Target Cluster
           type: string
-          description: Managed cluster to deploy to
-          default: gcp-cluster
+          description: Select a managed cluster to deploy to
+          default: hcp-cluster
           enum:
-            - gcp-cluster
+            - hcp-cluster
             - local-cluster
           enumNames:
-            - GCP Cluster
+            - HCP Cluster
             - Local Cluster (Hub)
 
         imageRegistry:
