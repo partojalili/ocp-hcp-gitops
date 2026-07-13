@@ -20,6 +20,7 @@ spec:
         - name
         - namespace
         - targetCluster
+        - sourceFolder
       properties:
         name:
           title: Application Name
@@ -27,6 +28,13 @@ spec:
           description: Name of your application deployment
           default: nodejs-app
           ui:autofocus: true
+
+        sourceFolder:
+          title: Source Folder in Git
+          type: string
+          description: Path to the application source code in the git repository (e.g., apps/nodejs)
+          default: apps/nodejs
+          ui:help: 'Folder containing the application source code'
 
         namespace:
           title: Namespace
@@ -94,6 +102,7 @@ spec:
         url: ./skeleton
         values:
           name: ${{ parameters.name }}
+          sourceFolder: ${{ parameters.sourceFolder }}
           namespace: ${{ parameters.namespace }}
           targetCluster: ${{ parameters.targetCluster }}
           imageRegistry: ${{ parameters.imageRegistry }}
