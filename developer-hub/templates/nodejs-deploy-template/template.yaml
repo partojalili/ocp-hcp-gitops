@@ -107,11 +107,9 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        allowedHosts: ['github.com']
         description: Deployment manifests for ${{ parameters.name }}
         repoUrl: github.com?owner=partojalili&repo=ocp-hcp-gitops
-        sourcePath: deployments/${{ parameters.name }}
-        targetPath: deployments/${{ parameters.name }}
+        defaultBranch: main
         gitCommitMessage: "Add deployment for ${{ parameters.name }} to ${{ parameters.targetCluster }}"
         gitAuthorName: Developer Hub
         gitAuthorEmail: devhub@redhat.com
