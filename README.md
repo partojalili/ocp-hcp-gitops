@@ -1,90 +1,69 @@
-# nodejs
+# nodejs-app
 
-Node.js API with JWT authentication
+Node.js application deployment to **hcp-cluster**
 
-## Features
+## Configuration
 
-- ✅ Express.js REST API
-- ✅ JWT Authentication
-- ✅ MongoDB Integration
-- ✅ Keycloak Support
-- ✅ Google OAuth Integration
-- ✅ Docker Support
+- **Namespace:** `nodejs-app`
+- **Replicas:** 2
+- **Image:** `quay.io/partojalili/nodejs-app`
+- **Port:** 8080
 
-## Getting Started
+## Deployment
 
-### Prerequisites
+This application is managed by ArgoCD and will automatically sync from Git.
 
-- Node.js 18+
-- MongoDB 4.4+
-- Docker (optional)
+### Manual Pipeline Trigger
 
-### Installation
+To manually trigger the build pipeline:
 
 ```bash
-# Install dependencies
-npm install
-
-# Copy environment template
-cp env .env
-
-# Edit .env with your configuration
-nano .env
-
-# Start the application
-npm run dev
+oc create -f pipeline/pipelinerun.yaml -n nodejs-app
 ```
 
-### Using Docker
+### View Pipeline Runs
 
 ```bash
-# Build the image
-docker build -t nodejs .
-
-# Run with MongoDB
-docker-compose up -d
+oc get pipelinerun -n nodejs-app
 ```
 
-## Environment Variables
-
-Configure the following in your `.env` file:
-
-- `DB` - MongoDB database name (default: myapp)
-- `HOSTDB` - MongoDB host
-- `DBPORT` - MongoDB port
-- `PORT` - Application port
-- `SESS_NAME` - Session name
-- `SESS_LIFETIME` - Session lifetime
-- `CLIENT_ID` - Google OAuth client ID
-- `CLIENT_SECRET` - Google OAuth client secret
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/signin` - Login user
-- `POST /api/auth/signout` - Logout user
-
-### User Management
-
-- `GET /api/users` - Get all users (admin only)
-- `GET /api/users/:id` - Get user by ID
-
-## Development
+### View Application
 
 ```bash
-# Run in development mode with auto-reload
-npm run dev
-
-# Run tests
-npm test
+oc get all -n nodejs-app
 ```
 
-## License
 
-ISC
+### Access Application
 
-## Owner
+The application is exposed via OpenShift Route:
 
-user:default/guest
+```bash
+oc get route nodejs-app -n nodejs-app
+```
+
+
+## CI/CD
+
+
+The Tekton pipeline includes:
+
+1. **git-clone** - Clone source code from GitHub
+2. **build-image** - Build container image using Buildah
+3. **update-deployment** - Update the deployment with new image
+4. **verify-deployment** - Verify the deployment is healthy
+
+### Webhook Integration
+
+An EventListener is configured to trigger builds automatically on GitHub push events.
+
+
+## Monitoring
+
+Check application health:
+
+```bash
+oc get deployment nodejs-app -n nodejs-app
+oc get pods -l app=nodejs-app -n nodejs-app
+oc logs -l app=nodejs-app -n nodejs-app
+```
