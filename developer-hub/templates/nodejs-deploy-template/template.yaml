@@ -121,25 +121,6 @@ spec:
         targetPath: deployments/${{ parameters.name }}
         sourcePath: .
 
-    - id: create-argocd-app
-      name: Create ArgoCD Application
-      action: cnoe:create-argocd-app
-      input:
-        appName: ${{ parameters.name }}
-        appNamespace: openshift-gitops
-        argoInstance: openshift-gitops/openshift-gitops
-        projectName: default
-        repoUrl: https://github.com/partojalili/ocp-hcp-gitops
-        path: deployments/${{ parameters.name }}
-        targetRevision: main
-        destinationServer: https://kubernetes.default.svc
-        destinationNamespace: ${{ parameters.namespace }}
-        syncPolicyAutomated: true
-        labels:
-          cluster: ${{ parameters.targetCluster }}
-          app-type: nodejs
-          managed-by: backstage
-
     - id: register
       name: Register Component
       action: catalog:register
