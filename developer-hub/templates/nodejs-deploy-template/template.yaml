@@ -109,12 +109,11 @@ spec:
 
     - id: publish
       name: Publish to GitHub
-      action: publish:github
+      action: publish:github:push
       input:
         repoUrl: github.com?owner=partojalili&repo=ocp-hcp-gitops
-        gitCommitMessage: "Deploy ${{ parameters.name }} to ${{ parameters.targetCluster }}"
-        gitAuthorName: Developer Hub
-        gitAuthorEmail: devhub@redhat.com
+        branch: main
+        commitMessage: "Deploy ${{ parameters.name }} to ${{ parameters.targetCluster }}"
 
     - id: register
       name: Register Component
