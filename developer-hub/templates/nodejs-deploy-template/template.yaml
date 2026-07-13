@@ -112,7 +112,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: github.com?owner=partojalili&repo=ocp-hcp-gitops
-        branchName: deploy-${{ parameters.name }}-${{ parameters.targetCluster }}-${{ parameters.namespace }}
+        branchName: deploy-${{ parameters.name }}-r${{ parameters.replicas }}
         title: "Deploy ${{ parameters.name }} to ${{ parameters.targetCluster }}"
         description: |
           ## Deployment Configuration
