@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nodejs-app
+  description: Node.js application deployed to hcp-cluster1
+  annotations:
+    argocd/app-name: nodejs-app
+    github.com/project-slug: partojalili/ocp-hcp-gitops
+    backstage.io/kubernetes-id: nodejs-app
+    backstage.io/kubernetes-namespace: nodejs-app
+    backstage.io/kubernetes-cluster: hcp-cluster1
+  tags:
+    - nodejs
+    - deployment
+    - hcp-cluster1
+  links:
+    - url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/deployments/nodejs-app
+      title: Deployment Manifests
+      icon: github
+    - url: https://nodejs-app-nodejs-app.apps.hcp-cluster1.gcp.redhatworkshops.io
+      title: Application URL
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/guest
+  system: nodejs-apps
+  dependsOn:
+    - component:default/nodejs
