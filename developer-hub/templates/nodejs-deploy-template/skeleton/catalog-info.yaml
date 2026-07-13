@@ -17,11 +17,11 @@ metadata:
     - url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/deployments/${{ values.name }}
       title: Deployment Manifests
       icon: github
-    {% if values.enableRoute %}
+{%- if values.enableRoute %}
     - url: https://${{ values.name }}-${{ values.namespace }}.apps.${{ values.targetCluster }}.gcp.redhatworkshops.io
       title: Application URL
       icon: web
-    {% endif %}
+{%- endif %}
 spec:
   type: service
   lifecycle: production
