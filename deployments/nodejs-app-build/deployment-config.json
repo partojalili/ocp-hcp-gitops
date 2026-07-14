@@ -1,0 +1,5 @@
+{
+  "name": "nodejs-app-build",
+  "namespace": "nodejs-app-build",
+  "targetCluster": "hcp-cluster"
+}
