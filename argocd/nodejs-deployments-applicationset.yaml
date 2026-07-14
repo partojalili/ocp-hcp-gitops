@@ -5,35 +5,26 @@ metadata:
   namespace: openshift-gitops
 spec:
   generators:
-    - matrix:
-        generators:
-          # Discover deployment directories in git
-          - git:
-              repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
-              revision: main
-              directories:
-                - path: deployments/*
-          # Combine with available clusters
-          - list:
-              elements:
-                - cluster: hcp-cluster
-                - cluster: gcp-cluster
-                - cluster: local-cluster
+    - git:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        revision: main
+        files:
+          - path: "deployments/*/deployment-config.json"
   template:
     metadata:
-      name: '{{path.basename}}-{{cluster}}'
+      name: '{{name}}-{{targetCluster}}'
       labels:
-        app: '{{path.basename}}'
-        target-cluster: '{{cluster}}'
+        app: '{{name}}'
+        target-cluster: '{{targetCluster}}'
     spec:
       project: default
       source:
         repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
         targetRevision: main
-        path: '{{path}}'
+        path: 'deployments/{{name}}'
       destination:
-        name: '{{cluster}}'
-        namespace: '{{path.basename}}'
+        name: '{{targetCluster}}'
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           prune: true
