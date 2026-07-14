@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nodejs-app5
+  namespace: nodejs-app
+  labels:
+    app: nodejs-app5
+spec:
+  to:
+    kind: Service
+    name: nodejs-app5
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
