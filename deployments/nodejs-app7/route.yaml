@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nodejs-app7
+  namespace: nodejs-app7
+  labels:
+    app: nodejs-app7
+spec:
+  to:
+    kind: Service
+    name: nodejs-app7
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
