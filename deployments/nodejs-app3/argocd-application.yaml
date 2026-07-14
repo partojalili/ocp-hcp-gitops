@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nodejs-app3
+  namespace: openshift-gitops
+  labels:
+    app: nodejs-app3
+    cluster: hcp-cluster
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+    targetRevision: main
+    path: deployments/nodejs-app3
+  destination:
+    name: hcp-cluster
+    namespace: nodejs-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
