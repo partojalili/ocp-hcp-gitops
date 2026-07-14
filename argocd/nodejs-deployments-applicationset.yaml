@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nodejs-deployments
+  namespace: openshift-gitops
+spec:
+  generators:
+    - matrix:
+        generators:
+          # Discover deployment directories in git
+          - git:
+              repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+              revision: main
+              directories:
+                - path: deployments/*
+          # Combine with available clusters
+          - list:
+              elements:
+                - cluster: hcp-cluster
+                - cluster: gcp-cluster
+                - cluster: local-cluster
+  template:
+    metadata:
+      name: '{{path.basename}}-{{cluster}}'
+      labels:
+        app: '{{path.basename}}'
+        target-cluster: '{{cluster}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        name: '{{cluster}}'
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
