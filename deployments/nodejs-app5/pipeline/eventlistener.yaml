@@ -1,0 +1,88 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: nodejs-app5-listener
+  namespace: nodejs-app
+  labels:
+    app: nodejs-app5
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: github-push
+      interceptors:
+        - ref:
+            name: github
+          params:
+            - name: secretRef
+              value:
+                secretName: github-webhook-secret
+                secretKey: token
+            - name: eventTypes
+              value:
+                - push
+      bindings:
+        - ref: nodejs-app5-triggerbinding
+      template:
+        ref: nodejs-app5-triggertemplate
+
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: nodejs-app5-triggerbinding
+  namespace: nodejs-app
+  labels:
+    app: nodejs-app5
+spec:
+  params:
+    - name: git-revision
+      value: $(body.head_commit.id)
+    - name: git-url
+      value: $(body.repository.url)
+
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: nodejs-app5-triggertemplate
+  namespace: nodejs-app
+  labels:
+    app: nodejs-app5
+spec:
+  params:
+    - name: git-revision
+    - name: git-url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: nodejs-app5-build-deploy-
+        namespace: nodejs-app
+      spec:
+        pipelineRef:
+          name: nodejs-app5-build-deploy
+        params:
+          - name: GIT_URL
+            value: $(tt.params.git-url)
+          - name: GIT_REVISION
+            value: $(tt.params.git-revision)
+          - name: IMAGE_NAME
+            value: quay.io/pjalili/nodejs-app
+          - name: IMAGE_TAG
+            value: $(tt.params.git-revision)
+          - name: APP_PATH
+            value: apps/nodejs
+          - name: DEPLOYMENT_NAMESPACE
+            value: nodejs-app
+        workspaces:
+          - name: source
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
+          - name: dockerconfig
+            secret:
+              secretName: registry-credentials
