@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nodejs-app1
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  
+  - route.yaml
+  
+  
+  - pipeline/
+  
+
+commonLabels:
+  app: nodejs-app1
+  app.kubernetes.io/name: nodejs-app1
+  app.kubernetes.io/component: backend
+  app.kubernetes.io/part-of: nodejs-app1
+  app.kubernetes.io/managed-by: argocd

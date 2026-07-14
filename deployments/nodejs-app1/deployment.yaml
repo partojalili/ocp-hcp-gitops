@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app1
+  namespace: nodejs-app1
+  labels:
+    app: nodejs-app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-app1
+  template:
+    metadata:
+      labels:
+        app: nodejs-app1
+    spec:
+      containers:
+      - name: nodejs-app1
+        image: quay.io/partojalili/nodejs-app1:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5

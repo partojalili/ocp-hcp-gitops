@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: nodejs-app1-build-deploy-
+  namespace: nodejs-app1
+  labels:
+    app: nodejs-app1
+    tekton.dev/pipeline: nodejs-app1-build-deploy
+spec:
+  pipelineRef:
+    name: nodejs-app1-build-deploy
+  params:
+    - name: GIT_URL
+      value: https://github.com/partojalili/ocp-hcp-gitops
+    - name: GIT_REVISION
+      value: main
+    - name: IMAGE_NAME
+      value: quay.io/partojalili/nodejs-app1
+    - name: IMAGE_TAG
+      value: $(context.pipelineRun.name)
+    - name: APP_PATH
+      value: apps/nodejs
+    - name: DEPLOYMENT_NAMESPACE
+      value: nodejs-app1
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: dockerconfig
+      secret:
+        secretName: registry-credentials
