@@ -18,7 +18,7 @@ spec:
     - name: IMAGE_NAME
       type: string
       description: Container image name
-      default: quay.io/partojalili/nodejs-app
+      default: quay.io/pjalili/nodejs-app
     - name: IMAGE_TAG
       type: string
       description: Container image tag

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nodejs-app4
-        image: quay.io/partojalili/nodejs-app:latest
+        image: quay.io/pjalili/nodejs-app:latest
         ports:
         - containerPort: 8080
           name: http

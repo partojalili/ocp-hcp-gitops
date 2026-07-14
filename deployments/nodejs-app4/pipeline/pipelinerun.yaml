@@ -15,7 +15,7 @@ spec:
     - name: GIT_REVISION
       value: main
     - name: IMAGE_NAME
-      value: quay.io/partojalili/nodejs-app
+      value: quay.io/pjalili/nodejs-app
     - name: IMAGE_TAG
       value: $(context.pipelineRun.name)
     - name: APP_PATH
