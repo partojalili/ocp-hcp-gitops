@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app6
+  namespace: nodejs-app6
+  labels:
+    app: nodejs-app6
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs-app6
+  template:
+    metadata:
+      labels:
+        app: nodejs-app6
+    spec:
+      containers:
+      - name: nodejs-app6
+        image: quay.io/pjalili/nodejs-app:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5

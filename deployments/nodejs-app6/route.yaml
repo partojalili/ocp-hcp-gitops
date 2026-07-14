@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nodejs-app6
+  namespace: nodejs-app6
+  labels:
+    app: nodejs-app6
+spec:
+  to:
+    kind: Service
+    name: nodejs-app6
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

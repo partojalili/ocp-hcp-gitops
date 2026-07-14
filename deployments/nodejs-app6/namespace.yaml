@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nodejs-app6
+  labels:
+    name: nodejs-app6
+    app: nodejs-app6
