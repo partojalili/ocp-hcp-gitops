@@ -12,7 +12,6 @@ resources:
   {% endif %}
   {% if values.enablePipeline %}
   - pipeline/pipeline.yaml
-  - pipeline/pipelinerun.yaml
   - pipeline/eventlistener.yaml
   {% endif %}
 

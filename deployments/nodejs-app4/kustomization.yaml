@@ -9,7 +9,6 @@ resources:
   - service.yaml
   - route.yaml
   - pipeline/pipeline.yaml
-  - pipeline/pipelinerun.yaml
   - pipeline/eventlistener.yaml
   
 
