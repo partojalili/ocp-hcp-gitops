@@ -7,11 +7,10 @@ resources:
   - namespace.yaml
   - deployment.yaml
   - service.yaml
-  
   - route.yaml
-  
-  
-  - pipeline/
+  - pipeline/pipeline.yaml
+  - pipeline/pipelinerun.yaml
+  - pipeline/eventlistener.yaml
   
 
 commonLabels:

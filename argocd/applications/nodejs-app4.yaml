@@ -1,23 +1,46 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: nodejs-app4
   namespace: openshift-gitops
   labels:
     app: nodejs-app4
-    cluster: hcp-cluster
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
-    targetRevision: main
-    path: deployments/nodejs-app4
-  destination:
-    name: hcp-cluster
-    namespace: nodejs-app
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+  generators:
+    - list:
+        elements:
+          - cluster: hcp-cluster
+            url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: 'nodejs-app4-{{cluster}}'
+      labels:
+        app: nodejs-app4
+        target-cluster: '{{cluster}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+        targetRevision: main
+        path: deployments/nodejs-app4
+      destination:
+        server: '{{url}}'
+        namespace: nodejs-app
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: nodejs-app4-placement
+  namespace: openshift-gitops
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchLabels:
+            name: hcp-cluster
