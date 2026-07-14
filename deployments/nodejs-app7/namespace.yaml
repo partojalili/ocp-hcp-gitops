@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: nodejs-app7
-  labels:
-    name: nodejs-app7
-    app: nodejs-app7
