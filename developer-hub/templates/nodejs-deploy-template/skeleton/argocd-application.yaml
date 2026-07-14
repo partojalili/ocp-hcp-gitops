@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${{ values.name }}
+  namespace: openshift-gitops
+  labels:
+    app: ${{ values.name }}
+    cluster: ${{ values.targetCluster }}
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/partojalili/ocp-hcp-gitops.git
+    targetRevision: main
+    path: deployments/${{ values.name }}
+  destination:
+    name: ${{ values.targetCluster }}
+    namespace: ${{ values.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
