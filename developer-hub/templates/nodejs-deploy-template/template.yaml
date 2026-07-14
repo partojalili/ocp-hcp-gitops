@@ -129,7 +129,7 @@ spec:
       name: Register Component
       action: catalog:register
       input:
-        repoContentsUrl: https://github.com/partojalili/ocp-hcp-gitops/blob/main
+        repoContentsUrl: ${{ steps.publish.output.remoteUrl }}
         catalogInfoPath: '/deployments/${{ parameters.name }}/catalog-info.yaml'
 
   output:
