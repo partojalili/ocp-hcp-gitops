@@ -10,7 +10,6 @@ spec:
     - list:
         elements:
           - cluster: hcp-cluster
-            url: https://kubernetes.default.svc
   template:
     metadata:
       name: 'nodejs-app4-{{cluster}}'
@@ -24,7 +23,7 @@ spec:
         targetRevision: main
         path: deployments/nodejs-app4
       destination:
-        server: '{{url}}'
+        name: '{{cluster}}'
         namespace: nodejs-app
       syncPolicy:
         automated:

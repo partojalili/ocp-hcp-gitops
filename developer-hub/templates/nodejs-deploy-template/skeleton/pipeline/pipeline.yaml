@@ -41,6 +41,7 @@ spec:
   tasks:
     - name: git-clone
       taskRef:
+        apiVersion: tekton.dev/v1beta1
         name: git-clone
         kind: ClusterTask
       params:
@@ -56,6 +57,7 @@ spec:
 
     - name: build-image
       taskRef:
+        apiVersion: tekton.dev/v1beta1
         name: buildah
         kind: ClusterTask
       runAfter:
@@ -77,6 +79,7 @@ spec:
 
     - name: update-deployment
       taskRef:
+        apiVersion: tekton.dev/v1beta1
         name: openshift-client
         kind: ClusterTask
       runAfter:
@@ -91,6 +94,7 @@ spec:
 
     - name: verify-deployment
       taskRef:
+        apiVersion: tekton.dev/v1beta1
         name: openshift-client
         kind: ClusterTask
       runAfter:
