@@ -134,6 +134,9 @@ spec:
 
   output:
     links:
+      - title: View Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+        icon: github
       - title: Repository
         url: https://github.com/partojalili/ocp-hcp-gitops/tree/main/deployments/${{ parameters.name }}
       - title: ArgoCD Application
