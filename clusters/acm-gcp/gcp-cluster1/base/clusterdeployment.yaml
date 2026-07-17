@@ -1,0 +1,38 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: gcp-cluster1
+  namespace: gcp-cluster1
+  labels:
+    cluster-name: gcp-cluster1
+    platform: gcp
+    vendor: OpenShift
+    cloud: GCP
+    cluster.open-cluster-management.io/clusterset: global
+spec:
+  baseDomain: xhsc9.gcp.redhatworkshops.io
+  clusterName: gcp-cluster1
+
+  # Control plane configuration
+  controlPlaneConfig:
+    servingCertificates: {}
+
+  # Install platform
+  platform:
+    gcp:
+      credentialsSecretRef:
+        name: gcp-cluster1-gcp-creds
+      region: us-east1
+
+  # Provisioning details
+  provisioning:
+    installConfigSecretRef:
+      name: gcp-cluster1-install-config
+    sshPrivateKeySecretRef:
+      name: gcp-cluster1-ssh-private-key
+    imageSetRef:
+      name: img4.20.24-x86-64-appsub
+
+  # Pull secret
+  pullSecretRef:
+    name: gcp-cluster1-pull-secret
