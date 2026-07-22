@@ -1,5 +1,0 @@
-{
-  "name": "nodejs-app-dev",
-  "namespace": "nodejs-app",
-  "targetCluster": "hcp-cluster"
-}
